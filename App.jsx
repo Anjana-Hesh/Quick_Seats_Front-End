@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
+
 import GetStartScreen from './src/screens/getStartScreen';
 import LoginPage from './src/screens/loginPage';
 import Register from './src/screens/registrationPage';
+import BusSignUp from './src/screens/busSignUp';
+import BusData from './src/screens/busData';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +45,8 @@ export default function App() {
         <Stack.Screen name="GetStart" component={GetStartScreen} />
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="BusSignUp" component={BusSignUp} />
+        <Stack.Screen name="BusData" component={BusData} />
       </Stack.Navigator>
     </NavigationContainer>
   );
