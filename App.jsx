@@ -9,6 +9,8 @@ import Register from './src/screens/registrationPage';
 import BusSignUp from './src/screens/busSignUp';
 import BusData from './src/screens/busData';
 import CustomerHome from './src/screens/customerHome';
+import SearchBus from './src/screens/searchBus';
+import SearchBookings from './src/screens/searchBooking'
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +51,9 @@ export default function App() {
         <Stack.Screen name="BusSignUp" component={BusSignUp} />
         <Stack.Screen name="BusData" component={BusData} />
         <Stack.Screen name="CustomerHome" component={CustomerHome} />
+        <Stack.Screen name='SearchBus' component={SearchBus} />
+        <Stack.Screen name='SearchBookings' component={SearchBookings} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

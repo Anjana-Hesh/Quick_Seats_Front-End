@@ -2,19 +2,23 @@ import React, { useState, useRef } from 'react';
 import { 
   View, 
   Text, 
+  TextInput,
   TouchableOpacity, 
   StyleSheet, 
   Dimensions, 
   ScrollView,
+  StatusBar,
+  SafeAreaView,
   Animated,
   TouchableWithoutFeedback
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
-const MENU_WIDTH = width * 0.7; // 70% of screen width
+const MENU_WIDTH = width * 0.7;
 
-const HomeScreen = ({ navigation }) => {
-  const [followings, setFollowings] = useState([
+const SearchBusScreen = ({ navigation }) => {
+  const [searchText, setSearchText] = useState('');
+  const [buses] = useState([
     { id: 1, busNumber: 'ACD-01-DB', isBookmarked: true },
     { id: 2, busNumber: 'ACD-01-DB', isBookmarked: true },
     { id: 3, busNumber: 'ACD-01-DB', isBookmarked: true },
@@ -22,20 +26,12 @@ const HomeScreen = ({ navigation }) => {
     { id: 5, busNumber: 'ACD-01-DB', isBookmarked: true },
     { id: 6, busNumber: 'ACD-01-DB', isBookmarked: true },
     { id: 7, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 8, busNumber: 'ACD-01-DB', isBookmarked: true },
+    { id: 8, busNumber: 'ACD-01-DB', isBookmarked: false },
   ]);
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
-
-  const toggleBookmark = (id) => {
-    setFollowings(prevFollowings =>
-      prevFollowings.map(item =>
-        item.id === id ? { ...item, isBookmarked: !item.isBookmarked } : item
-      )
-    );
-  };
 
   const openMenu = () => {
     setIsMenuVisible(true);
@@ -70,6 +66,10 @@ const HomeScreen = ({ navigation }) => {
     });
   };
 
+  const handleBackPress = () => {
+    navigation.navigate('CustomerHome'); // Navigate to CustomerHome screen
+  };
+
   const handleMenuPress = () => {
     if (isMenuVisible) {
       closeMenu();
@@ -82,13 +82,12 @@ const HomeScreen = ({ navigation }) => {
     console.log(`${item} pressed`);
     closeMenu();
     
-    // Add navigation logic for menu items
     switch(item) {
       case 'Profile':
-        // navigation.navigate('Profile');
+        navigation.navigate('Profile');
         break;
       case 'Settings':
-        // navigation.navigate('Settings');
+        navigation.navigate('Settings');
         break;
       case 'Log out':
         // Handle logout logic
@@ -96,45 +95,40 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const handleIconPress = (iconName) => {
-    console.log(`${iconName} pressed`);
-    // Add navigation logic for each icon
-    switch(iconName) {
-      case 'bus':
-        navigation.navigate('SearchBus');
-        break;
-      case 'bookmark':
-        navigation.navigate('SearchBookings');
-        break;
-      case 'location':
-        // navigation.navigate('Map');
-        break;
-      case 'search':
-        // navigation.navigate('Search');
-        break;
-    }
+  const handleBookmarkPress = (busId) => {
+    console.log(`Bookmark pressed for bus ${busId}`);
   };
 
-  const FollowingItem = ({ item }) => (
-    <View style={styles.followingItem}>
-      <View style={styles.followingContent}>
+  const handleBusPress = (busId) => {
+    console.log(`Bus ${busId} pressed`);
+    navigation.navigate('BusDetails', { busId });
+  };
+
+  const BusItem = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.busItem}
+      onPress={() => handleBusPress(item.id)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.busContent}>
         <View style={styles.userIcon}>
           <Text style={styles.userIconText}>👤</Text>
         </View>
         <Text style={styles.busNumber}>{item.busNumber}</Text>
       </View>
+      
       <TouchableOpacity 
         style={styles.bookmarkButton}
-        onPress={() => toggleBookmark(item.id)}
+        onPress={() => handleBookmarkPress(item.id)}
       >
-        <Text style={[
+        <View style={[
           styles.bookmarkIcon,
-          { color: item.isBookmarked ? '#8B5CF6' : '#9CA3AF' }
+          { backgroundColor: item.isBookmarked ? '#8B5CF6' : '#9CA3AF' }
         ]}>
-          🏷️
-        </Text>
+          <Text style={styles.bookmarkText}>🏷️</Text>
+        </View>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   const MenuItem = ({ title, onPress }) => (
@@ -148,80 +142,71 @@ const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header with gradient background */}
+    <SafeAreaView style={styles.container}>
+      {/* Proper Status Bar */}
+      <StatusBar barStyle="light-content" backgroundColor="#14B8A6" />
+      
+      {/* Header */}
       <View style={styles.header}>
-        {/* User Profile Section */}
-        <View style={styles.userSection}>
-          <View style={styles.profilePicture}>
-            <Text style={styles.profileIcon}>👤</Text>
+        {/* Navigation Header */}
+        <View style={styles.navigationHeader}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={handleBackPress}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.headerTitle}>Search Bus</Text>
+          
+          <TouchableOpacity 
+            style={styles.menuButton}
+            onPress={handleMenuPress}
+          >
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              placeholderTextColor="#9CA3AF"
+              value={searchText}
+              onChangeText={setSearchText}
+            />
           </View>
-          <Text style={styles.greeting}>Hi Anjana ,</Text>
         </View>
+      </View>
 
-        {/* Menu Button */}
-        <TouchableOpacity 
-          style={styles.menuButton}
-          onPress={handleMenuPress}
-        >
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
+      {/* Filter Buttons */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity style={styles.filterButton}>
+          <Text style={styles.filterButtonText}>Filter 1</Text>
         </TouchableOpacity>
-
-        {/* Navigation Icons */}
-        <View style={styles.navigationIcons}>
-          <TouchableOpacity 
-            style={styles.navIcon}
-            onPress={() => handleIconPress('bus')}
-          >
-            <Text style={styles.navIconText}>🚌</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.navIcon}
-            onPress={() => handleIconPress('bookmark')}
-          >
-            <Text style={styles.navIconText}>🔖</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.navIcon}
-            onPress={() => handleIconPress('location')}
-          >
-            <Text style={styles.navIconText}>📍</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.navIcon}
-            onPress={() => handleIconPress('search')}
-          >
-            <Text style={styles.navIconText}>💬</Text> 
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.filterButton}>
+          <Text style={styles.filterButtonText}>Filter 2</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Main Content */}
-      <View style={styles.contentContainer}>
-        {/* Followings Section */}
-        <View style={styles.followingsHeader}>
-          <Text style={styles.followingsTitle}>Followings</Text>
-        </View>
-
-        {/* Followings List */}
-        <ScrollView 
-          style={styles.followingsList}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
-          {followings.map((item) => (
-            <FollowingItem key={item.id} item={item} />
-          ))}
-          
-          {/* Add some bottom padding */}
-          <View style={{ height: 20 }} />
-        </ScrollView>
-      </View>
+      {/* Bus List */}
+      <ScrollView 
+        style={styles.busList}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+      >
+        {buses.map((item) => (
+          <BusItem key={item.id} item={item} />
+        ))}
+        
+        {/* Add some bottom padding */}
+        <View style={{ height: 20 }} />
+      </ScrollView>
 
       {/* Menu Overlay and Slide Menu */}
       {isMenuVisible && (
@@ -260,7 +245,7 @@ const HomeScreen = ({ navigation }) => {
           </Animated.View>
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -271,48 +256,40 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#14B8A6',
-    paddingTop: 50,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+    paddingBottom: 25,
   },
-  userSection: {
+  navigationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 25,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginTop: StatusBar.currentHeight || 0, // Account for status bar height
   },
-  profilePicture: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
-    backgroundColor: 'white',
+  backButton: {
+    width: 35,
+    height: 35,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  profileIcon: {
-    fontSize: 20,
+  backArrow: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
-  greeting: {
+  headerTitle: {
+    color: 'white',
     fontSize: 20,
     fontWeight: '600',
-    color: 'white',
     flex: 1,
+    marginLeft: 15,
   },
   menuButton: {
-    position: 'absolute',
-    top: 55,
-    right: 20,
     width: 30,
     height: 25,
     justifyContent: 'space-between',
-    zIndex: 10,
   },
   menuLine: {
     width: 25,
@@ -320,49 +297,56 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 2,
   },
-  navigationIcons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  searchContainer: {
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
-  navIcon: {
-    width: 55,
-    height: 55,
-    borderRadius: 27,
-    backgroundColor: 'white',
-    justifyContent: 'center',
+  searchBar: {
+    flexDirection: 'row',
     alignItems: 'center',
-    elevation: 4,
+    backgroundColor: 'white',
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  navIconText: {
-    fontSize: 24,
+  searchIcon: {
+    fontSize: 18,
+    marginRight: 10,
+    color: '#9CA3AF',
   },
-  contentContainer: {
+  searchInput: {
     flex: 1,
-    backgroundColor: 'white',
-    marginTop: -15,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    paddingTop: 25,
+    fontSize: 16,
+    color: '#374151',
+    padding: 0,
   },
-  followingsHeader: {
+  filterContainer: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingVertical: 15,
+    gap: 10,
   },
-  followingsTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2937',
+  filterButton: {
+    backgroundColor: '#E5E7EB',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  followingsList: {
+  filterButtonText: {
+    color: '#6B7280',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  busList: {
     flex: 1,
     paddingHorizontal: 20,
   },
-  followingItem: {
+  busItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -377,7 +361,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
-  followingContent: {
+  busContent: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
@@ -386,7 +370,7 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 17,
-    backgroundColor: '#9CA3AF',
+    backgroundColor: '#8B5CF6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
@@ -405,7 +389,15 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   bookmarkIcon: {
-    fontSize: 20,
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bookmarkText: {
+    fontSize: 14,
+    color: 'white',
   },
   // Menu Styles
   overlay: {
@@ -486,4 +478,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default SearchBusScreen;
