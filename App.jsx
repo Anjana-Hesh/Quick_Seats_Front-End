@@ -11,6 +11,9 @@ import BusData from './src/screens/busData';
 import CustomerHome from './src/screens/customerHome';
 import SearchBus from './src/screens/searchBus';
 import SearchBookings from './src/screens/searchBooking'
+import CheckLocation from './src/screens/checkLocation'
+import MessageDetails from './src/screens/messageDetails'
+import MessageInbox from './src/screens/messageInbox'
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +56,9 @@ export default function App() {
         <Stack.Screen name="CustomerHome" component={CustomerHome} />
         <Stack.Screen name='SearchBus' component={SearchBus} />
         <Stack.Screen name='SearchBookings' component={SearchBookings} />
+        <Stack.Screen name='CheckLocation' component={CheckLocation} />
+        <Stack.Screen name='MessageDetails' component={MessageDetails} />
+        <Stack.Screen name='MessageInbox' component={MessageInbox} />
 
       </Stack.Navigator>
     </NavigationContainer>

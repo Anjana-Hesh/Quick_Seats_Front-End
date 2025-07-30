@@ -107,10 +107,10 @@ const HomeScreen = ({ navigation }) => {
         navigation.navigate('SearchBookings');
         break;
       case 'location':
-        // navigation.navigate('Map');
+        navigation.navigate('CheckLocation');
         break;
       case 'search':
-        // navigation.navigate('Search');
+        navigation.navigate('MessageDetails');
         break;
     }
   };
