@@ -8,6 +8,7 @@ import LoginPage from './src/screens/loginPage';
 import Register from './src/screens/registrationPage';
 import BusSignUp from './src/screens/busSignUp';
 import BusData from './src/screens/busData';
+import CustomerHome from './src/screens/customerHome';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +48,7 @@ export default function App() {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="BusSignUp" component={BusSignUp} />
         <Stack.Screen name="BusData" component={BusData} />
+        <Stack.Screen name="CustomerHome" component={CustomerHome} />
       </Stack.Navigator>
     </NavigationContainer>
   );

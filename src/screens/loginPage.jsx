@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -13,40 +15,49 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Gradient Background */}
+      <View style={styles.gradientBackground} />
       
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="User Name"
-          placeholderTextColor={'#032549ff'}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={'#032549ff'}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        // onPress={handleLogin}
-        onPress={() => navigation.navigate('BusSignUp')}
-      >
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
+      {/* Main Content Card */}
+      <View style={styles.contentCard}>
+        {/* Input Container */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="User Name"
+            placeholderTextColor="#0F766E"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#0F766E"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
 
-      <TouchableOpacity 
-        style={styles.registerLink} 
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text style={styles.registerText}>Don't have an account? Register</Text>
-      </TouchableOpacity>
+        {/* Sign In Button */}
+        <TouchableOpacity
+          style={styles.signInButton}
+          onPress={() => navigation.navigate('CustomerHome')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.signInButtonText}>Sign In</Text>
+        </TouchableOpacity>
+
+        {/* Register Link */}
+        <TouchableOpacity
+          style={styles.registerLink}
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.registerText}>Don't have an account? Register</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -54,48 +65,77 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    backgroundColor: '#F3F4F6',
   },
-  time: {
-    fontSize: 24,
-    marginBottom: 40,
-    alignSelf: 'flex-end',
+  gradientBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: height * 0.4,
+    backgroundColor: '#3B82F6',
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
+  },
+  contentCard: {
+    flex: 1,
+    marginTop: height * 0.25,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingTop: 60,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -5,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   inputContainer: {
-    width: '100%',
-    marginBottom: 30,
+    marginBottom: 40,
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
+    height: 55,
+    borderColor: '#E5E7EB',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
+    borderRadius: 15,
+    paddingHorizontal: 20,
     marginBottom: 20,
     fontSize: 16,
+    backgroundColor: '#FAFAFA',
+    color: '#1F2937',
   },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 15,
-    borderRadius: 8,
-    width: '100%',
+  signInButton: {
+    backgroundColor: '#1E293B',
+    paddingVertical: 18,
+    borderRadius: 15,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
+    elevation: 3,
+    shadowColor: '#1E293B',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
-  buttonText: {
+  signInButtonText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   registerLink: {
+    alignItems: 'center',
     marginTop: 10,
   },
   registerText: {
-    color: '#007AFF',
+    color: '#3B82F6',
     fontSize: 16,
+    fontWeight: '500',
   },
 });
 
