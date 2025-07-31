@@ -14,6 +14,8 @@ import SearchBookings from './src/screens/searchBooking'
 import CheckLocation from './src/screens/checkLocation'
 import MessageDetails from './src/screens/messageDetails'
 import MessageInbox from './src/screens/messageInbox'
+import BookingDetailsScreen from './src/screens/bookingDetails';
+import BusLocationScreen from './src/screens/busLocationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +61,8 @@ export default function App() {
         <Stack.Screen name='CheckLocation' component={CheckLocation} />
         <Stack.Screen name='MessageDetails' component={MessageDetails} />
         <Stack.Screen name='MessageInbox' component={MessageInbox} />
+        <Stack.Screen name="BookingDetails" component={BookingDetailsScreen}  options={{ headerShown: false }} />
+        <Stack.Screen name="BusLocationScreen" component={BusLocationScreen} options={{ headerShown: false }} />
 
       </Stack.Navigator>
     </NavigationContainer>

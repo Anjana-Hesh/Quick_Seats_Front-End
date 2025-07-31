@@ -20,14 +20,14 @@ const MENU_WIDTH = width * 0.7;
 const CheckLocationScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buses] = useState([
-    { id: 1, number: 'ACD-01-DB' },
-    { id: 2, number: 'ACD-01-DB' },
-    { id: 3, number: 'ACD-01-DB' },
-    { id: 4, number: 'ACD-01-DB' },
-    { id: 5, number: 'ACD-01-DB' },
-    { id: 6, number: 'ACD-01-DB' },
-    { id: 7, number: 'ACD-01-DB' },
-    { id: 8, number: 'ACD-01-DB' },
+    { id: 1, number: 'ACD-01-DB', route: 'Colombo - Kandy', currentLocation: { latitude: 7.2906, longitude: 80.6337 } },
+    { id: 2, number: 'ACD-02-DB', route: 'Colombo - Galle', currentLocation: { latitude: 6.9271, longitude: 79.8612 } },
+    { id: 3, number: 'ACD-03-DB', route: 'Kandy - Nuwara Eliya', currentLocation: { latitude: 7.2906, longitude: 80.6337 } },
+    { id: 4, number: 'ACD-04-DB', route: 'Colombo - Matara', currentLocation: { latitude: 6.9497, longitude: 79.8544 } },
+    { id: 5, number: 'ACD-05-DB', route: 'Kurunegala - Colombo', currentLocation: { latitude: 7.4863, longitude: 80.3647 } },
+    { id: 6, number: 'ACD-06-DB', route: 'Negombo - Colombo', currentLocation: { latitude: 7.2083, longitude: 79.8358 } },
+    { id: 7, number: 'ACD-07-DB', route: 'Anuradhapura - Colombo', currentLocation: { latitude: 8.3114, longitude: 80.4037 } },
+    { id: 8, number: 'ACD-08-DB', route: 'Ratnapura - Colombo', currentLocation: { latitude: 6.6828, longitude: 80.4126 } },
   ]);
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -75,9 +75,21 @@ const CheckLocationScreen = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleBusPress = (busNumber) => {
-    navigation.navigate('BusLocation', { busNumber });
+  const handleBusPress = (bus) => {
+    // Navigate to BusLocationScreen with bus data
+    navigation.navigate('BusLocationScreen', { 
+      busNumber: bus.number,
+      route: bus.route,
+      currentLocation: bus.currentLocation,
+      busId: bus.id
+    });
   };
+
+  // Filter buses based on search text
+  const filteredBuses = buses.filter(bus => 
+    bus.number.toLowerCase().includes(searchText.toLowerCase()) ||
+    bus.route.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const BatteryIcon = ({ level }) => {
     const batteryColor = level > 20 ? 'black' : 'red';
@@ -93,11 +105,17 @@ const CheckLocationScreen = ({ navigation }) => {
   const BusItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.busItem}
-      onPress={() => handleBusPress(item.number)}
+      onPress={() => handleBusPress(item)}
       activeOpacity={0.7}
     >
-      <Text style={styles.busNumber}>{item.number}</Text>
-      <Text style={styles.arrowIcon}>→</Text>
+      <View style={styles.busInfo}>
+        <Text style={styles.busNumber}>{item.number}</Text>
+        <Text style={styles.busRoute}>{item.route}</Text>
+        <Text style={styles.locationStatus}>• Live Location Available</Text>
+      </View>
+      <View style={styles.arrowContainer}>
+        <Text style={styles.arrowIcon}>→</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -161,10 +179,10 @@ const CheckLocationScreen = ({ navigation }) => {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>Q</Text>
+          <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search"
+            placeholder="Search by bus number or route"
             placeholderTextColor="#9CA3AF"
             value={searchText}
             onChangeText={setSearchText}
@@ -172,14 +190,27 @@ const CheckLocationScreen = ({ navigation }) => {
         </View>
       </View>
 
+      {/* Results Count */}
+      <View style={styles.resultsContainer}>
+        <Text style={styles.resultsText}>
+          {filteredBuses.length} bus{filteredBuses.length !== 1 ? 'es' : ''} found
+        </Text>
+      </View>
+
       {/* Bus List */}
       <ScrollView 
         style={styles.busList}
         showsVerticalScrollIndicator={false}
       >
-        {buses.map((bus) => (
-          <BusItem key={bus.id} item={bus} />
-        ))}
+        {filteredBuses.length > 0 ? (
+          filteredBuses.map((bus) => (
+            <BusItem key={bus.id} item={bus} />
+          ))
+        ) : (
+          <View style={styles.noBusesContainer}>
+            <Text style={styles.noBusesText}>No buses found matching your search</Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Slide Menu */}
@@ -205,7 +236,7 @@ const CheckLocationScreen = ({ navigation }) => {
                 <View style={styles.menuProfilePicture}>
                   <Text style={styles.menuProfileIcon}>👤</Text>
                 </View>
-                <Text style={styles.menuProfileName}>User</Text>
+                <Text style={styles.menuProfileName}> Anjana</Text>
               </View>
             </View>
 
@@ -340,7 +371,6 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     fontSize: 16,
-    fontWeight: 'bold',
     marginRight: 8,
     color: '#6B7280',
   },
@@ -349,6 +379,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#374151',
     padding: 0,
+  },
+  resultsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  resultsText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
   },
   busList: {
     flex: 1,
@@ -361,15 +400,44 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  busInfo: {
+    flex: 1,
   },
   busNumber: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#1F2937',
+    marginBottom: 4,
+  },
+  busRoute: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  locationStatus: {
+    fontSize: 12,
+    color: '#10B981',
+    fontWeight: '500',
+  },
+  arrowContainer: {
+    paddingLeft: 10,
   },
   arrowIcon: {
     fontSize: 18,
     color: '#9CA3AF',
+  },
+  noBusesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  noBusesText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   overlay: {
     position: 'absolute',

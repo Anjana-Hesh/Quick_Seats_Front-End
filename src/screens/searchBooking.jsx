@@ -116,7 +116,7 @@ const SearchBookingsScreen = ({ navigation }) => {
 
   const handleBookingPress = (bookingId) => {
     console.log(`Booking ${bookingId} pressed`);
-    navigation.navigate('BookingDetails', { bookingId });
+     navigation.navigate('BookingDetails', { bookingId });
   };
 
   const FilterButton = ({ item, isSelected }) => (
