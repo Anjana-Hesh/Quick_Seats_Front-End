@@ -170,7 +170,7 @@ export default function MobileMessageInterface({ navigation }) {
           </View>
 
           {/* Book Button */}
-          <TouchableOpacity style={styles.bookButton}>
+          <TouchableOpacity style={styles.bookButton} onPress={() => navigation.navigate('BoockingDate')}>
             <Text style={styles.bookButtonText}>Book</Text>
           </TouchableOpacity>
         </ScrollView>

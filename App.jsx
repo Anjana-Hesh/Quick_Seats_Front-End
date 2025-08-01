@@ -16,6 +16,7 @@ import MessageDetails from './src/screens/messageDetails'
 import MessageInbox from './src/screens/messageInbox'
 import BookingDetailsScreen from './src/screens/bookingDetails';
 import BusLocationScreen from './src/screens/busLocationScreen';
+import BoockingDate from './src/screens/boockingDate'
 
 const Stack = createNativeStackNavigator();
 
@@ -63,6 +64,7 @@ export default function App() {
         <Stack.Screen name='MessageInbox' component={MessageInbox} />
         <Stack.Screen name="BookingDetails" component={BookingDetailsScreen}  options={{ headerShown: false }} />
         <Stack.Screen name="BusLocationScreen" component={BusLocationScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="BoockingDate" component={BoockingDate} options={{ headerShown: false }} />
 
       </Stack.Navigator>
     </NavigationContainer>
