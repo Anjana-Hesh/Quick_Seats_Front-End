@@ -44,7 +44,7 @@ const LoginScreen = ({ navigation }) => {
         {/* Sign In Button */}
         <TouchableOpacity
           style={styles.signInButton}
-          onPress={() => navigation.navigate('CustomerHome')}
+          onPress={() => navigation.navigate('DriverHome')}
           activeOpacity={0.8}
         >
           <Text style={styles.signInButtonText}>Sign In</Text>

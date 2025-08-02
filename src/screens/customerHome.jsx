@@ -7,11 +7,11 @@ import {
   Dimensions, 
   ScrollView,
   Animated,
-  TouchableWithoutFeedback
 } from 'react-native';
+import SideMenu from './components/SideMenu'; // Import the new component
 
 const { width, height } = Dimensions.get('window');
-const MENU_WIDTH = width * 0.7; // 70% of screen width
+const MENU_WIDTH = width * 0.7;
 
 const HomeScreen = ({ navigation }) => {
   const [followings, setFollowings] = useState([
@@ -78,12 +78,12 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const handleMenuItemPress = (item) => {
-    console.log(`${item} pressed`);
+  const handleMenuItemPress = (action) => {
+    console.log(`${action} pressed`);
     closeMenu();
     
     // Add navigation logic for menu items
-    switch(item) {
+    switch(action) {
       case 'Profile':
         // navigation.navigate('Profile');
         break;
@@ -137,15 +137,13 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
-  const MenuItem = ({ title, onPress }) => (
-    <TouchableOpacity 
-      style={styles.menuItem}
-      onPress={() => onPress(title)}
-      activeOpacity={0.7}
-    >
-      <Text style={styles.menuItemText}>{title}</Text>
-    </TouchableOpacity>
-  );
+  // Custom menu items
+  const menuItems = [
+    { title: "Profile", action: "Profile" },
+    { title: "Settings", action: "Settings" },
+    { title: "Help & Support", action: "Help" },
+    { title: "Log out", action: "Log out" }
+  ];
 
   return (
     <View style={styles.container}>
@@ -223,43 +221,16 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
       </View>
 
-      {/* Menu Overlay and Slide Menu */}
-      {isMenuVisible && (
-        <>
-          {/* Dark Overlay */}
-          <TouchableWithoutFeedback onPress={closeMenu}>
-            <Animated.View 
-              style={[
-                styles.overlay,
-                { opacity: overlayOpacity }
-              ]} 
-            />
-          </TouchableWithoutFeedback>
-
-          {/* Sliding Menu */}
-          <Animated.View 
-            style={[
-              styles.slideMenu,
-              { left: slideAnim }
-            ]}
-          >
-            <View style={styles.menuHeader}>
-              <View style={styles.menuProfileSection}>
-                <View style={styles.menuProfilePicture}>
-                  <Text style={styles.menuProfileIcon}>👤</Text>
-                </View>
-                <Text style={styles.menuProfileName}>Anjana</Text>
-              </View>
-            </View>
-
-            <View style={styles.menuContent}>
-              <MenuItem title="Profile" onPress={handleMenuItemPress} />
-              <MenuItem title="Settings" onPress={handleMenuItemPress} />
-              <MenuItem title="Log out" onPress={handleMenuItemPress} />
-            </View>
-          </Animated.View>
-        </>
-      )}
+      {/* Side Menu Component */}
+      <SideMenu
+        isVisible={isMenuVisible}
+        slideAnim={slideAnim}
+        overlayOpacity={overlayOpacity}
+        onClose={closeMenu}
+        onMenuItemPress={handleMenuItemPress}
+        profileName="Anjana"
+        menuItems={menuItems}
+      />
     </View>
   );
 };
@@ -406,83 +377,6 @@ const styles = StyleSheet.create({
   },
   bookmarkIcon: {
     fontSize: 20,
-  },
-  // Menu Styles
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'black',
-    zIndex: 20,
-  },
-  slideMenu: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: MENU_WIDTH,
-    backgroundColor: '#67C7D4',
-    zIndex: 30,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-  },
-  menuHeader: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  menuProfileSection: {
-    alignItems: 'center',
-  },
-  menuProfilePicture: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-  },
-  menuProfileIcon: {
-    fontSize: 28,
-  },
-  menuProfileName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
-  menuContent: {
-    flex: 1,
-    paddingTop: 20,
-  },
-  menuItem: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    marginHorizontal: 15,
-    marginVertical: 5,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  menuItemText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#374151',
   },
 });
 
