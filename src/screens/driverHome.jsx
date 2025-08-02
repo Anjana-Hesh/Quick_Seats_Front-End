@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,13 @@ import {
   SafeAreaView,
   TextInput,
   Alert,
+  Animated,
+  Dimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
+const MENU_WIDTH = width * 0.7;
 
 const ClientListScreen = ({ navigation }) => {
   const [clients, setClients] = useState([
@@ -23,6 +29,10 @@ const ClientListScreen = ({ navigation }) => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  
+  const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
 
   // Filter clients based on search query
   const filteredClients = clients.filter(client =>
@@ -36,22 +46,95 @@ const ClientListScreen = ({ navigation }) => {
       `Selected: ${client.name}\nStatus: ${client.status}\nPhone: ${client.phone}`,
       [
         { text: 'Call', onPress: () => console.log('Calling ' + client.phone) },
-        { text: 'Message', onPress: () => console.log('Messaging ' + client.name) },
+        { 
+          text: 'Message', 
+          onPress: () => {
+            console.log('Messaging ' + client.name);
+            navigation.navigate('MessageInbox', { clientName: client.name, clientId: client.id });
+          }
+        },
         { text: 'Cancel', style: 'cancel' }
       ]
     );
   };
 
+  const openMenu = () => {
+    setIsMenuVisible(true);
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0.5,
+        duration: 300,
+        useNativeDriver: false,
+      })
+    ]).start();
+  };
+
+  const closeMenu = () => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: -MENU_WIDTH,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      })
+    ]).start(() => {
+      setIsMenuVisible(false);
+    });
+  };
+
   const handleMenuPress = () => {
-    Alert.alert('Menu', 'Menu options here');
+    if (isMenuVisible) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  };
+
+  const handleMenuItemPress = (action) => {
+    console.log(`${action} pressed`);
+    closeMenu();
+    
+    switch(action) {
+      case 'Profile':
+        // navigation.navigate('Profile');
+        console.log('Navigate to Profile');
+        break;
+      case 'Settings':
+        // navigation.navigate('Settings');
+        console.log('Navigate to Settings');
+        break;
+      case 'Help':
+        console.log('Navigate to Help & Support');
+        break;
+      case 'Log out':
+        Alert.alert(
+          'Log Out',
+          'Are you sure you want to log out?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Log Out', onPress: () => console.log('Logging out...') }
+          ]
+        );
+        break;
+    }
   };
 
   const handleBookmarkPress = () => {
-    Alert.alert('Bookmarks', 'Bookmark functionality');
+     navigation.navigate('SearchBookings');
   };
 
   const handleChatPress = () => {
-    Alert.alert('Chat', 'Chat functionality');
+    // Navigate to MessageInbox when chat icon is pressed
+    navigation.navigate('MessageInbox');
   };
 
   // Manual Icons Components
@@ -203,6 +286,71 @@ const ClientListScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  // SideMenu Component
+  const SideMenu = () => {
+    const menuItems = [
+      { title: "Profile", action: "Profile" },
+      { title: "Settings", action: "Settings" },
+      { title: "Help & Support", action: "Help" },
+      { title: "Log out", action: "Log out" }
+    ];
+
+    const MenuItem = ({ title, action }) => (
+      <TouchableOpacity 
+        style={styles.menuItem}
+        onPress={() => handleMenuItemPress(action)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.menuItemText}>{title}</Text>
+      </TouchableOpacity>
+    );
+
+    if (!isMenuVisible) return null;
+
+    return (
+      <>
+        {/* Dark Overlay */}
+        <TouchableWithoutFeedback onPress={closeMenu}>
+          <Animated.View 
+            style={[
+              styles.overlay,
+              { opacity: overlayOpacity }
+            ]} 
+          />
+        </TouchableWithoutFeedback>
+
+        {/* Sliding Menu */}
+        <Animated.View 
+          style={[
+            styles.slideMenu,
+            { left: slideAnim }
+          ]}
+        >
+          {/* Menu Header with Profile */}
+          <View style={styles.menuHeader}>
+            <View style={styles.menuProfileSection}>
+              <View style={styles.menuProfilePicture}>
+                <PersonIcon size={28} color="#6B46C1" />
+              </View>
+              <Text style={styles.menuProfileName}>Anjana</Text>
+            </View>
+          </View>
+
+          {/* Menu Content */}
+          <View style={styles.menuContent}>
+            {menuItems.map((item, index) => (
+              <MenuItem 
+                key={index} 
+                title={item.title} 
+                action={item.action}
+              />
+            ))}
+          </View>
+        </Animated.View>
+      </>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -214,16 +362,16 @@ const ClientListScreen = ({ navigation }) => {
             </View>
             <Text style={styles.greeting}>Hi Anjana ,</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleMenuPress}>
             <MenuIcon size={24} color="white" />
           </TouchableOpacity>
         </View>
         
         <View style={styles.iconRow}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleBookmarkPress}>
             <BookmarkIcon size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleChatPress}>
             <ChatIcon size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -279,11 +427,18 @@ const ClientListScreen = ({ navigation }) => {
           />
         )}
       </View>
+
+      {/* Side Menu */}
+      <SideMenu />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    marginTop: 5, // Move all components down by 5px
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -455,6 +610,81 @@ const styles = StyleSheet.create({
     width: 8,
     height: 20,
     borderRadius: 4,
+  },
+  
+  // Side Menu Styles
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'black',
+    zIndex: 20,
+  },
+  slideMenu: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: MENU_WIDTH,
+    backgroundColor: '#4FC3D7',
+    zIndex: 30,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  menuHeader: {
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  menuProfileSection: {
+    alignItems: 'center',
+  },
+  menuProfilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+  },
+  menuProfileName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'white',
+  },
+  menuContent: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  menuItem: {
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginHorizontal: 15,
+    marginVertical: 5,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
   },
 });
 
