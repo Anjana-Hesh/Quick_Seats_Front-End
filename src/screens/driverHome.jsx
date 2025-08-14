@@ -108,7 +108,7 @@ const ClientListScreen = ({ navigation }) => {
         navigation.navigate('Profile');
         break;
       case 'Settings':
-        navigation.navigate('Settings');
+        navigation.navigate('BusSetting');
         break;
       case 'Help':
         navigation.navigate('Help');

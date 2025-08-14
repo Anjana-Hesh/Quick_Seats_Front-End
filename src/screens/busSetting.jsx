@@ -62,9 +62,9 @@ const SettingsScreen = () => {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
   
   // Form states
-  const [driverName, setDriverName] = useState('Dhan Thanuka');
-  const [phoneNumber, setPhoneNumber] = useState('0765545789');
-  const [email, setEmail] = useState('DhanDas@gmail.com');
+  const [driverName, setDriverName] = useState('Anjana Heshan');
+  const [phoneNumber, setPhoneNumber] = useState('0765545851');
+  const [email, setEmail] = useState('anjana@gmail.com');
   const [busName, setBusName] = useState('');
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');

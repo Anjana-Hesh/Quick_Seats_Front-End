@@ -23,6 +23,9 @@ import DriverBookingData from './src/screens/driverBookingData';
 import DriverMessage from './src/screens/driverMessage';
 import SeatAvailability from './src/screens/seatsAvailability';
 import BusSetting from './src/screens/busSetting';
+import OwnerSettings from './src/screens/ownerSettings';
+import CustomerSettings from './src/screens/customerSettings';
+import OwnerHome from './src/screens/ownerHome';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,7 +79,10 @@ export default function App() {
         <Stack.Screen name="DriverBookingData" component={DriverBookingData} />
         <Stack.Screen name="DriverMessage" component={DriverMessage} />
         <Stack.Screen name="SeatAvailability" component={SeatAvailability} />
-        {/* <Stack.Screen name="BusSetting" component={BusSetting} /> */}
+        <Stack.Screen name="BusSetting" component={BusSetting} />
+        <Stack.Screen name="OwnerSettings" component={OwnerSettings} />
+        <Stack.Screen name="CustomerSettings" component={CustomerSettings} />
+        <Stack.Screen name="OwnerHome" component={OwnerHome} />
 
       </Stack.Navigator>
     </NavigationContainer>

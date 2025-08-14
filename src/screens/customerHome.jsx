@@ -8,7 +8,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import SideMenu from './components/SideMenu'; // Import the new component
+import SideMenu from './components/SideMenu';
 
 const { width, height } = Dimensions.get('window');
 const MENU_WIDTH = width * 0.7;
@@ -86,13 +86,28 @@ const HomeScreen = ({ navigation }) => {
     switch(action) {
       case 'Profile':
         // navigation.navigate('Profile');
+        console.log('Navigating to Profile...');
         break;
       case 'Settings':
-        // navigation.navigate('Settings');
+        // Navigate to CustomerSettings page
+        navigation.navigate('CustomerSettings');
+        console.log('Navigating to CustomerSettings...');
+        break;
+      case 'Help':
+        // navigation.navigate('Help');
+        console.log('Navigating to Help & Support...');
         break;
       case 'Log out':
         // Handle logout logic
+        console.log('Logging out...');
+        // You can add logout logic here like:
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: 'Login' }],
+        // });
         break;
+      default:
+        console.log(`Unknown action: ${action}`);
     }
   };
 
