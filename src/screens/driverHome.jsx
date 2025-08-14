@@ -105,15 +105,13 @@ const ClientListScreen = ({ navigation }) => {
     
     switch(action) {
       case 'Profile':
-        // navigation.navigate('Profile');
-        console.log('Navigate to Profile');
+        navigation.navigate('Profile');
         break;
       case 'Settings':
-        // navigation.navigate('Settings');
-        console.log('Navigate to Settings');
+        navigation.navigate('Settings');
         break;
       case 'Help':
-        console.log('Navigate to Help & Support');
+        navigation.navigate('Help');
         break;
       case 'Log out':
         Alert.alert(
@@ -121,7 +119,7 @@ const ClientListScreen = ({ navigation }) => {
           'Are you sure you want to log out?',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Log Out', onPress: () => console.log('Logging out...') }
+            { text: 'Log Out', onPress: () => navigation.navigate('Login') }
           ]
         );
         break;
@@ -129,12 +127,15 @@ const ClientListScreen = ({ navigation }) => {
   };
 
   const handleBookmarkPress = () => {
-     navigation.navigate('SearchBookings');
+    navigation.navigate('DriverBooking');
   };
 
   const handleChatPress = () => {
-    // Navigate to MessageInbox when chat icon is pressed
-    navigation.navigate('MessageInbox');
+    navigation.navigate('DriverMessage');
+  };
+
+  const handleSeatVisibility = () => {
+    navigation.navigate('SeatAvailability');
   };
 
   // Manual Icons Components
@@ -224,6 +225,53 @@ const ClientListScreen = ({ navigation }) => {
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderTopColor: color,
+      }} />
+    </View>
+  );
+
+  const BusIcon = ({ size = 24, color = "white" }) => (
+    <View style={{
+      width: size,
+      height: size * 0.6,
+      borderRadius: size * 0.1,
+      backgroundColor: color,
+      position: 'relative',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}>
+      <View style={{
+        position: 'absolute',
+        top: -size * 0.15,
+        left: size * 0.2,
+        width: size * 0.6,
+        height: size * 0.3,
+        borderRadius: size * 0.15,
+        backgroundColor: color,
+      }} />
+      <View style={{
+        width: size * 0.8,
+        height: size * 0.15,
+        backgroundColor: 'white',
+        borderRadius: size * 0.05,
+        marginTop: size * 0.05
+      }} />
+      <View style={{
+        position: 'absolute',
+        bottom: -size * 0.1,
+        left: size * 0.1,
+        width: size * 0.2,
+        height: size * 0.2,
+        borderRadius: size * 0.1,
+        backgroundColor: color,
+      }} />
+      <View style={{
+        position: 'absolute',
+        bottom: -size * 0.1,
+        right: size * 0.1,
+        width: size * 0.2,
+        height: size * 0.2,
+        borderRadius: size * 0.1,
+        backgroundColor: color,
       }} />
     </View>
   );
@@ -374,6 +422,9 @@ const ClientListScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.iconButton} onPress={handleChatPress}>
             <ChatIcon size={24} color="white" />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={handleSeatVisibility}>
+            <BusIcon size={24} color="white" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -435,10 +486,6 @@ const ClientListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    marginTop: 5, // Move all components down by 5px
-  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -477,7 +524,7 @@ const styles = StyleSheet.create({
   iconRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 40,
+    paddingHorizontal: 10,
   },
   iconButton: {
     width: 50,
@@ -486,6 +533,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   clientSection: {
     flex: 1,
@@ -611,8 +659,6 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
   },
-  
-  // Side Menu Styles
   overlay: {
     position: 'absolute',
     top: 0,

@@ -18,6 +18,11 @@ import BookingDetailsScreen from './src/screens/bookingDetails';
 import BusLocationScreen from './src/screens/busLocationScreen';
 import BoockingDate from './src/screens/boockingDate'
 import DriverHome from './src/screens/driverHome';
+import DriverBooking from './src/screens/driverBookingPage';
+import DriverBookingData from './src/screens/driverBookingData';
+import DriverMessage from './src/screens/driverMessage';
+import SeatAvailability from './src/screens/seatsAvailability';
+import BusSetting from './src/screens/busSetting';
 
 const Stack = createNativeStackNavigator();
 
@@ -67,6 +72,11 @@ export default function App() {
         <Stack.Screen name="BusLocationScreen" component={BusLocationScreen} options={{ headerShown: false }} />
         <Stack.Screen name="BoockingDate" component={BoockingDate} options={{ headerShown: false }} />
         <Stack.Screen name="DriverHome" component={DriverHome} />
+        <Stack.Screen name="DriverBooking" component={DriverBooking} />
+        <Stack.Screen name="DriverBookingData" component={DriverBookingData} />
+        <Stack.Screen name="DriverMessage" component={DriverMessage} />
+        <Stack.Screen name="SeatAvailability" component={SeatAvailability} />
+        {/* <Stack.Screen name="BusSetting" component={BusSetting} /> */}
 
       </Stack.Navigator>
     </NavigationContainer>
