@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,18 @@ import {
   SafeAreaView,
   FlatList,
   Alert,
+  Animated,
+  Dimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const DRAWER_WIDTH = 280;
 
 const DriversScreen = ({ navigation }) => {
   const [tooltipVisible, setTooltipVisible] = useState(null);
-  const [menuVisible, setMenuVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const drivers = [
     { id: '1', name: 'James Carter' },
@@ -29,7 +36,7 @@ const DriversScreen = ({ navigation }) => {
       id: 'add-driver', 
       icon: '➕', 
       tooltip: 'Add New Driver',
-      action: () => Alert.alert('Add Driver', 'Navigate to add driver form')
+      action: () => navigation.navigate('AddDriverPage')
     },
     { 
       id: 'search', 
@@ -38,10 +45,10 @@ const DriversScreen = ({ navigation }) => {
       action: () => Alert.alert('Search', 'Open search functionality')
     },
     { 
-      id: 'filter', 
-      icon: '🔧', 
-      tooltip: 'Filter & Settings',
-      action: () => Alert.alert('Settings', 'Open filter and settings')
+      id: 'bookings', 
+      icon: ' 🔖', 
+      tooltip: 'bookings',
+      action: () => navigation.navigate('DriverBooking') 
     },
   ];
 
@@ -54,22 +61,60 @@ const DriversScreen = ({ navigation }) => {
     { id: '6', title: 'Logout', icon: '🚪' },
   ];
 
-  const handleMenuPress = () => {
-    setMenuVisible(!menuVisible);
+  const toggleDrawer = () => {
+    if (isDrawerOpen) {
+      // Close drawer
+      Animated.timing(slideAnim, {
+        toValue: -DRAWER_WIDTH,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => {
+        setIsDrawerOpen(false);
+      });
+    } else {
+      // Open drawer
+      setIsDrawerOpen(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  const closeDrawer = () => {
+    if (isDrawerOpen) {
+      Animated.timing(slideAnim, {
+        toValue: -DRAWER_WIDTH,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => {
+        setIsDrawerOpen(false);
+      });
+    }
   };
 
   const handleMenuItemPress = (item) => {
-    setMenuVisible(false);
-    if (item.title === 'Messages') {
-      navigation.navigate('MessageInbox');
-    }else if(item.title === 'Settings'){
+    closeDrawer();
+    switch (item.title) {
+      case 'Messages':
+        navigation.navigate('MessageInbox');
+        break;
+      case 'Settings':
         navigation.navigate('OwnerSettings');
+        break;
+      case 'Dashboard':
+        case 'Profile':
+        case 'Logout':
+          Alert.alert(`${item.title}`, `Navigate to ${item.title}`);
+        break;
+      default:
+        break;
     }
-    // Add navigation for other menu items as needed
   };
 
   const handleDriverPress = (driver) => {
-    Alert.alert('Driver Selected', `Selected: ${driver.name}`);
+    navigation.navigate('DriverBookingDataPrice', { driver: driver });
   };
 
   const handleDriverMessage = (driver) => {
@@ -115,11 +160,11 @@ const DriversScreen = ({ navigation }) => {
 
   const renderMenuItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.menuItem}
+      style={styles.drawerItem}
       onPress={() => handleMenuItemPress(item)}
     >
-      <Text style={styles.menuItemIcon}>{item.icon}</Text>
-      <Text style={styles.menuItemText}>{item.title}</Text>
+      <Text style={styles.drawerItemIcon}>{item.icon}</Text>
+      <Text style={styles.drawerItemText}>{item.title}</Text>
     </TouchableOpacity>
   );
 
@@ -127,6 +172,24 @@ const DriversScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A9EAF" />
       
+      {/* Overlay */}
+      {isDrawerOpen && (
+        <TouchableWithoutFeedback onPress={closeDrawer}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
+      )}
+
+      {/* Drawer */}
+      <Animated.View style={[styles.drawer, { right: slideAnim }]}>
+        <View style={styles.drawerContent}>
+          <FlatList
+            data={menuItems}
+            renderItem={renderMenuItem}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
+      </Animated.View>
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -138,22 +201,10 @@ const DriversScreen = ({ navigation }) => {
           </View>
         </View>
         
-        <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+        <TouchableOpacity onPress={toggleDrawer} style={styles.menuButton}>
           <Text style={styles.menuIcon}>☰</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Menu Bar */}
-      {menuVisible && (
-        <View style={styles.menuContainer}>
-          <FlatList
-            data={menuItems}
-            renderItem={renderMenuItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.menuList}
-          />
-        </View>
-      )}
 
       {/* Action Circles */}
       <View style={styles.actionsContainer}>
@@ -191,6 +242,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#4A9EAF',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 998,
+  },
+  drawer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: DRAWER_WIDTH,
+    backgroundColor: '#4A9EAF',
+    zIndex: 999,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: -2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+  },
+  drawerContent: {
+    flex: 1,
+    paddingTop: 80,
+    paddingHorizontal: 20,
+  },
+  drawerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    marginBottom: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  drawerItemIcon: {
+    fontSize: 20,
+    marginRight: 15,
+  },
+  drawerItemText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
   },
   header: {
     flexDirection: 'row',
@@ -232,38 +339,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  menuContainer: {
-    position: 'absolute',
-    top: 70,
-    right: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 10,
-    zIndex: 100,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  menuList: {
-    padding: 5,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    minWidth: 150,
-  },
-  menuItemIcon: {
-    fontSize: 18,
-    marginRight: 15,
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: '#2E3B5C',
   },
   actionsContainer: {
     flexDirection: 'row',
