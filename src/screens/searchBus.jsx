@@ -179,7 +179,7 @@ const SearchBusScreen = ({ navigation }) => {
             <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Search"
+              placeholder="Enter Your Destination"
               placeholderTextColor="#9CA3AF"
               value={searchText}
               onChangeText={setSearchText}
