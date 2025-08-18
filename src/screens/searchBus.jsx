@@ -99,15 +99,19 @@ const SearchBusScreen = ({ navigation }) => {
     console.log(`Bookmark pressed for bus ${busId}`);
   };
 
-  const handleBusPress = (busId) => {
+  // Updated function to navigate to BookingDetailsScreen
+  const handleBusPress = (busId, busNumber) => {
     console.log(`Bus ${busId} pressed`);
-    navigation.navigate('BusDetails', { busId });
+    navigation.navigate('DetailsBusBooking', { 
+      busId: busId,
+      busNumber: busNumber 
+    });
   };
 
   const BusItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.busItem}
-      onPress={() => handleBusPress(item.id)}
+      onPress={() => handleBusPress(item.id, item.busNumber)}
       activeOpacity={0.7}
     >
       <View style={styles.busContent}>

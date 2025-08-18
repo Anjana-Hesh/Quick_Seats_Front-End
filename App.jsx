@@ -28,6 +28,7 @@ import CustomerSettings from './src/screens/customerSettings';
 import OwnerHome from './src/screens/ownerHome';
 import DriverBookingDataPrice from './src/screens/driveBookingDataPrice';
 import AddDriverPage from './src/screens/addDriverPage';
+import DetailsBusBooking from './src/screens/detailsBusBookings'
 
 const Stack = createNativeStackNavigator();
 
@@ -87,6 +88,7 @@ export default function App() {
         <Stack.Screen name="OwnerHome" component={OwnerHome} />
         <Stack.Screen name="DriverBookingDataPrice" component={DriverBookingDataPrice} />
         <Stack.Screen name="AddDriverPage" component={AddDriverPage} />
+        <Stack.Screen name="DetailsBusBooking" component={DetailsBusBooking} />
 
       </Stack.Navigator>
     </NavigationContainer>

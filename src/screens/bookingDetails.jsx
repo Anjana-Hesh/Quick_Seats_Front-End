@@ -79,28 +79,6 @@ const BookingDetailsScreen = ({ navigation, route }) => {
       
       {/* Header */}
       <View style={styles.header}>
-        {/* Status Bar Simulation */}
-        <View style={styles.statusBar}>
-          <Text style={styles.timeText}>22:00</Text>
-          <View style={styles.notchArea}>
-            <View style={styles.notch} />
-          </View>
-          <View style={styles.statusIcons}>
-            <View style={styles.signalBars}>
-              <View style={[styles.bar, styles.bar1]} />
-              <View style={[styles.bar, styles.bar2]} />
-              <View style={[styles.bar, styles.bar3]} />
-              <View style={[styles.bar, styles.bar4]} />
-            </View>
-            <View style={styles.wifiIcon}>
-              <Text style={styles.iconText}>📶</Text>
-            </View>
-            <View style={styles.batteryIcon}>
-              <View style={styles.battery} />
-            </View>
-          </View>
-        </View>
-
         {/* Navigation Header */}
         <View style={styles.navigationHeader}>
           <TouchableOpacity 
@@ -195,69 +173,13 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
     paddingBottom: 20,
   },
-  statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 5,
-  },
-  timeText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  notchArea: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  notch: {
-    width: 120,
-    height: 25,
-    backgroundColor: 'black',
-    borderRadius: 15,
-  },
-  statusIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  signalBars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginRight: 5,
-  },
-  bar: {
-    width: 3,
-    backgroundColor: 'white',
-    marginRight: 1,
-  },
-  bar1: { height: 4 },
-  bar2: { height: 6 },
-  bar3: { height: 8 },
-  bar4: { height: 10 },
-  wifiIcon: {
-    marginRight: 5,
-  },
-  iconText: {
-    color: 'white',
-    fontSize: 12,
-  },
-  batteryIcon: {
-    marginLeft: 5,
-  },
-  battery: {
-    width: 20,
-    height: 10,
-    backgroundColor: 'white',
-    borderRadius: 2,
-  },
   navigationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
+    marginTop: StatusBar.currentHeight || 0,
   },
   backButton: {
     width: 35,
