@@ -10,6 +10,39 @@ import {
   Alert,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const BusLocationScreen = ({ route, navigation }) => {
   const { busNumber, route: busRoute, currentLocation, busId } = route.params;
@@ -20,7 +53,7 @@ const BusLocationScreen = ({ route, navigation }) => {
   // Simulate real-time location updates
   useEffect(() => {
     let locationInterval;
-    
+
     if (isTracking) {
       locationInterval = setInterval(() => {
         // Simulate bus movement (small random changes)
@@ -44,11 +77,14 @@ const BusLocationScreen = ({ route, navigation }) => {
 
   const handleCenterMap = () => {
     if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        ...busLocation,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 1000);
+      mapRef.current.animateToRegion(
+        {
+          ...busLocation,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000,
+      );
     }
   };
 
@@ -56,34 +92,35 @@ const BusLocationScreen = ({ route, navigation }) => {
     setIsTracking(!isTracking);
     if (!isTracking) {
       Alert.alert(
-        "Live Tracking",
-        "Live tracking enabled. Bus location will update automatically.",
-        [{ text: "OK" }]
+        'Live Tracking',
+        'Live tracking enabled. Bus location will update automatically.',
+        [{ text: 'OK' }],
       );
     } else {
-      Alert.alert(
-        "Live Tracking",
-        "Live tracking disabled.",
-        [{ text: "OK" }]
-      );
+      Alert.alert('Live Tracking', 'Live tracking disabled.', [{ text: 'OK' }]);
     }
   };
 
   const getBusInfo = () => {
     // Simulate API call to get more bus details
     Alert.alert(
-      "Bus Information",
+      'Bus Information',
       `Bus: ${busNumber}\nRoute: ${busRoute}\nStatus: Active\nDriver: John Doe\nNext Stop: Main Street\nETA: 5 minutes`,
-      [{ text: "OK" }]
+      [{ text: 'OK' }],
     );
   };
 
   const BatteryIcon = ({ level = 75 }) => {
     const batteryColor = level > 20 ? 'black' : 'red';
-    
+
     return (
       <View style={styles.batteryContainer}>
-        <View style={[styles.battery, { width: `${level}%`, backgroundColor: batteryColor }]} />
+        <View
+          style={[
+            styles.battery,
+            { width: `${level}%`, backgroundColor: batteryColor },
+          ]}
+        />
         <View style={styles.batteryTip} />
       </View>
     );
@@ -92,17 +129,17 @@ const BusLocationScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       {/* Custom Status Bar */}
       <View style={styles.statusBar}>
         <Text style={styles.timeText}>22:00</Text>
-        
+
         {Platform.OS === 'ios' && (
           <View style={styles.notchArea}>
             <View style={styles.notch} />
           </View>
         )}
-        
+
         <View style={styles.statusIcons}>
           <View style={styles.signalBars}>
             <View style={[styles.bar, styles.bar1]} />
@@ -110,29 +147,23 @@ const BusLocationScreen = ({ route, navigation }) => {
             <View style={[styles.bar, styles.bar3]} />
             <View style={[styles.bar, styles.bar4]} />
           </View>
-          <Text style={styles.iconText}>📶</Text>
+          <Text style={styles.iconText}></Text>
           <BatteryIcon level={75} />
         </View>
       </View>
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleBackPress}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        
+
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>{busNumber}</Text>
           <Text style={styles.headerSubtitle}>{busRoute}</Text>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.infoButton}
-          onPress={getBusInfo}
-        >
+
+        <TouchableOpacity style={styles.infoButton} onPress={getBusInfo}>
           <Text style={styles.infoIcon}>ℹ️</Text>
         </TouchableOpacity>
       </View>
@@ -165,10 +196,7 @@ const BusLocationScreen = ({ route, navigation }) => {
         </MapView>
 
         {/* Map Controls */}
-        <TouchableOpacity 
-          style={styles.centerButton}
-          onPress={handleCenterMap}
-        >
+        <TouchableOpacity style={styles.centerButton} onPress={handleCenterMap}>
           <Text style={styles.centerButtonText}>📍</Text>
         </TouchableOpacity>
       </View>
@@ -177,19 +205,24 @@ const BusLocationScreen = ({ route, navigation }) => {
       <View style={styles.bottomPanel}>
         <View style={styles.busStatusContainer}>
           <View style={styles.statusIndicator}>
-            <View style={[styles.statusDot, { backgroundColor: isTracking ? '#10B981' : '#EF4444' }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: isTracking ? '#10B981' : '#EF4444' },
+              ]}
+            />
             <Text style={styles.statusText}>
               {isTracking ? 'Live Tracking' : 'Static Location'}
             </Text>
           </View>
-          
+
           <Text style={styles.lastUpdated}>
             Last updated: {new Date().toLocaleTimeString()}
           </Text>
         </View>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.actionButton, styles.trackingButton]}
             onPress={handleToggleTracking}
           >
@@ -198,9 +231,11 @@ const BusLocationScreen = ({ route, navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.actionButton, styles.shareButton]}
-            onPress={() => Alert.alert('Share', 'Location shared successfully!')}
+            onPress={() =>
+              Alert.alert('Share', 'Location shared successfully!')
+            }
           >
             <Text style={styles.actionButtonText}>Share Location</Text>
           </TouchableOpacity>
@@ -208,7 +243,8 @@ const BusLocationScreen = ({ route, navigation }) => {
 
         <View style={styles.locationInfo}>
           <Text style={styles.coordinatesText}>
-            📍 {busLocation.latitude.toFixed(6)}, {busLocation.longitude.toFixed(6)}
+            📍 {busLocation.latitude.toFixed(6)},{' '}
+            {busLocation.longitude.toFixed(6)}
           </Text>
         </View>
       </View>

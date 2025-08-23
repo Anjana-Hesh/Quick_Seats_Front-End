@@ -1,15 +1,48 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Dimensions, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
   ScrollView,
-  Alert
+  Alert,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const BusDataScreen = ({ navigation }) => {
   const [busLayout, setBusLayout] = useState([]);
@@ -20,10 +53,10 @@ const BusDataScreen = ({ navigation }) => {
     { id: '1', name: '1', seats: 1 },
     { id: '2', name: '2', seats: 2 },
     { id: '3', name: '3', seats: 3 },
-    { id: 'side', name: 'Side Seat', seats: 1 }
+    { id: 'side', name: 'Side Seat', seats: 1 },
   ];
 
-  const handleSeatTypeSelect = (type) => {
+  const handleSeatTypeSelect = type => {
     setSelectedSeatType(type);
   };
 
@@ -40,21 +73,17 @@ const BusDataScreen = ({ navigation }) => {
     setBusLayout([...busLayout, newSeat]);
   };
 
-  const removeSeat = (seatId) => {
-    Alert.alert(
-      'Remove Seat',
-      'Are you sure you want to remove this seat?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Remove', 
-          style: 'destructive',
-          onPress: () => {
-            setBusLayout(busLayout.filter(seat => seat.id !== seatId));
-          }
-        }
-      ]
-    );
+  const removeSeat = seatId => {
+    Alert.alert('Remove Seat', 'Are you sure you want to remove this seat?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          setBusLayout(busLayout.filter(seat => seat.id !== seatId));
+        },
+      },
+    ]);
   };
 
   const SeatIcon = ({ type, seats, isInBus = false, onPress }) => {
@@ -77,27 +106,19 @@ const BusDataScreen = ({ navigation }) => {
       const boxes = [];
       for (let i = 0; i < seats; i++) {
         boxes.push(
-          <View 
-            key={i} 
-            style={[
-              styles.seatBox,
-              i > 0 && { marginLeft: 2 }
-            ]} 
-          />
+          <View key={i} style={[styles.seatBox, i > 0 && { marginLeft: 2 }]} />,
         );
       }
       return boxes;
     };
 
     return (
-      <TouchableOpacity 
-        style={getSeatStyle()} 
+      <TouchableOpacity
+        style={getSeatStyle()}
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <View style={styles.seatContainer}>
-          {renderSeatBoxes()}
-        </View>
+        <View style={styles.seatContainer}>{renderSeatBoxes()}</View>
         {isInBus && (
           <Text style={styles.seatLabel}>{type === 'side' ? 'S' : seats}</Text>
         )}
@@ -105,59 +126,62 @@ const BusDataScreen = ({ navigation }) => {
     );
   };
 
-  const handleBusAreaPress = (event) => {
+  const handleBusAreaPress = event => {
     const { locationX, locationY } = event.nativeEvent;
     // Add some boundary checks
-    if (locationX > 10 && locationX < width * 0.7 - 50 && 
-        locationY > 50 && locationY < height * 0.35 - 50) {
+    if (
+      locationX > 10 &&
+      locationX < width * 0.7 - 50 &&
+      locationY > 50 &&
+      locationY < height * 0.35 - 50
+    ) {
       addSeatToBus(locationX, locationY);
     }
   };
 
   const handleSave = () => {
     if (busLayout.length === 0) {
-      Alert.alert('No Seats', 'Please add some seats to the bus layout before saving.');
+      Alert.alert(
+        'No Seats',
+        'Please add some seats to the bus layout before saving.',
+      );
       return;
     }
-    
+
     Alert.alert(
       'Save Layout',
       `Save bus layout with ${busLayout.length} seats?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Save', 
+        {
+          text: 'Save',
           onPress: () => {
             console.log('Bus layout saved:', busLayout);
             navigation.goBack();
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
   const clearLayout = () => {
     if (busLayout.length === 0) return;
-    
-    Alert.alert(
-      'Clear Layout',
-      'Are you sure you want to remove all seats?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Clear All', 
-          style: 'destructive',
-          onPress: () => setBusLayout([])
-        }
-      ]
-    );
+
+    Alert.alert('Clear Layout', 'Are you sure you want to remove all seats?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear All',
+        style: 'destructive',
+        onPress: () => setBusLayout([]),
+      },
+    ]);
   };
 
   return (
     <ScrollView style={styles.container} bounces={false}>
       {/* Header with gradient background */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -170,19 +194,21 @@ const BusDataScreen = ({ navigation }) => {
       <View style={styles.contentCard}>
         {/* Seat Type Selector */}
         <View style={styles.seatTypeContainer}>
-          {seatTypes.map((type) => (
+          {seatTypes.map(type => (
             <TouchableOpacity
               key={type.id}
               style={[
                 styles.seatTypeButton,
-                selectedSeatType === type.id && styles.seatTypeButtonSelected
+                selectedSeatType === type.id && styles.seatTypeButtonSelected,
               ]}
               onPress={() => handleSeatTypeSelect(type.id)}
             >
-              <Text style={[
-                styles.seatTypeText,
-                selectedSeatType === type.id && styles.seatTypeTextSelected
-              ]}>
+              <Text
+                style={[
+                  styles.seatTypeText,
+                  selectedSeatType === type.id && styles.seatTypeTextSelected,
+                ]}
+              >
                 {type.name}
               </Text>
             </TouchableOpacity>
@@ -191,18 +217,16 @@ const BusDataScreen = ({ navigation }) => {
 
         {/* Instruction */}
         <Text style={styles.instructionText}>
-          Select a seat type above, then tap anywhere in the bus area to add seats
+          Select a seat type above, then tap anywhere in the bus area to add
+          seats
         </Text>
 
         {/* Available Seat Icons for Reference */}
         <Text style={styles.sectionTitle}>Available Seat Types</Text>
         <View style={styles.availableSeatsContainer}>
-          {seatTypes.map((type) => (
+          {seatTypes.map(type => (
             <View key={type.id} style={styles.availableSeatItem}>
-              <SeatIcon 
-                type={type.id} 
-                seats={type.seats}
-              />
+              <SeatIcon type={type.id} seats={type.seats} />
               <Text style={styles.availableSeatLabel}>{type.name}</Text>
             </View>
           ))}
@@ -213,7 +237,7 @@ const BusDataScreen = ({ navigation }) => {
           <Text style={styles.layoutTitle}>
             Bus Layout ({busLayout.length} seats)
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.busContainer}
             onPress={handleBusAreaPress}
             activeOpacity={1}
@@ -225,19 +249,16 @@ const BusDataScreen = ({ navigation }) => {
                 <View style={styles.steeringWheel} />
                 <Text style={styles.driverLabel}>Driver</Text>
               </View>
-              
+
               {/* Seat placement area */}
               <View style={styles.seatPlacementArea}>
-                {busLayout.map((seat) => (
+                {busLayout.map(seat => (
                   <View
                     key={seat.id}
-                    style={[
-                      styles.placedSeat,
-                      { left: seat.x, top: seat.y }
-                    ]}
+                    style={[styles.placedSeat, { left: seat.x, top: seat.y }]}
                   >
-                    <SeatIcon 
-                      type={seat.type} 
+                    <SeatIcon
+                      type={seat.type}
                       seats={seat.seats}
                       isInBus={true}
                       onPress={() => removeSeat(seat.id)}
@@ -252,12 +273,14 @@ const BusDataScreen = ({ navigation }) => {
               </View>
             </View>
           </TouchableOpacity>
-          
+
           {/* Instructions */}
           <Text style={styles.instructions}>
-            • Tap in the bus area to add the selected seat type{'\n'}
-            • Tap on placed seats to remove them{'\n'}
-            • Selected seat type: <Text style={styles.selectedType}>{seatTypes.find(s => s.id === selectedSeatType)?.name}</Text>
+            • Tap in the bus area to add the selected seat type{'\n'}• Tap on
+            placed seats to remove them{'\n'}• Selected seat type:{' '}
+            <Text style={styles.selectedType}>
+              {seatTypes.find(s => s.id === selectedSeatType)?.name}
+            </Text>
           </Text>
         </View>
 
@@ -266,7 +289,7 @@ const BusDataScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.clearButton} onPress={clearLayout}>
             <Text style={styles.clearButtonText}>Clear All</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save Layout</Text>
           </TouchableOpacity>

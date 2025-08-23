@@ -1,33 +1,107 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  View,
+  Text,
   TextInput,
-  TouchableOpacity, 
-  StyleSheet, 
-  Dimensions, 
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
   ScrollView,
   StatusBar,
   SafeAreaView,
   Animated,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const { width, height } = Dimensions.get('window');
 const MENU_WIDTH = width * 0.7;
 
+async function getUserData() {
+  try {
+    const userData = await AsyncStorage.getItem('usersArray');
+    if (userData !== null) {
+      return JSON.parse(userData);
+    }
+    return [];
+  } catch (error) {
+    console.log('Error retrieving user data:', error);
+    return [];
+  }
+}
+
 const SearchBusScreen = ({ navigation }) => {
+  useFocusEffect(
+    React.useCallback(() => {
+      loadBus();
+
+      return () => console.log('Screen unfocused');
+    }, []),
+  );
   const [searchText, setSearchText] = useState('');
-  const [buses] = useState([
-    { id: 1, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 2, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 3, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 4, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 5, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 6, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 7, busNumber: 'ACD-01-DB', isBookmarked: true },
-    { id: 8, busNumber: 'ACD-01-DB', isBookmarked: false },
+  const [buses, setBus] = useState([
+    { id: 1, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 2, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 3, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 4, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 5, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 6, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 7, name: 'ACD-01-DB', isBookmarked: true },
+    { id: 8, name: 'ACD-01-DB', isBookmarked: false },
   ]);
+
+  async function loadBus() {
+    try {
+      const users = await getUserData();
+
+      if (Array.isArray(users)) {
+        // Collect all buses across all users
+        const allBuses = users.flatMap(user => user.bus || []);
+        console.log(allBuses);
+        setBus(allBuses);
+        return allBuses;
+      }
+
+      return null;
+    } catch (error) {
+      console.log('Error no bus user:', error);
+      return null;
+    }
+  }
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
@@ -45,7 +119,7 @@ const SearchBusScreen = ({ navigation }) => {
         toValue: 0.5,
         duration: 300,
         useNativeDriver: false,
-      })
+      }),
     ]).start();
   };
 
@@ -60,7 +134,7 @@ const SearchBusScreen = ({ navigation }) => {
         toValue: 0,
         duration: 300,
         useNativeDriver: false,
-      })
+      }),
     ]).start(() => {
       setIsMenuVisible(false);
     });
@@ -78,11 +152,11 @@ const SearchBusScreen = ({ navigation }) => {
     }
   };
 
-  const handleMenuItemPress = (item) => {
+  const handleMenuItemPress = item => {
     console.log(`${item} pressed`);
     closeMenu();
-    
-    switch(item) {
+
+    switch (item) {
       case 'Profile':
         navigation.navigate('Profile');
         break;
@@ -95,40 +169,42 @@ const SearchBusScreen = ({ navigation }) => {
     }
   };
 
-  const handleBookmarkPress = (busId) => {
+  const handleBookmarkPress = busId => {
     console.log(`Bookmark pressed for bus ${busId}`);
   };
 
   // Updated function to navigate to BookingDetailsScreen
   const handleBusPress = (busId, busNumber) => {
     console.log(`Bus ${busId} pressed`);
-    navigation.navigate('DetailsBusBooking', { 
+    navigation.navigate('DetailsBusBooking', {
       busId: busId,
-      busNumber: busNumber 
+      busNumber: busNumber,
     });
   };
 
   const BusItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.busItem}
-      onPress={() => handleBusPress(item.id, item.busNumber)}
+      onPress={() => handleBusPress(item.id, item.name)}
       activeOpacity={0.7}
     >
       <View style={styles.busContent}>
         <View style={styles.userIcon}>
           <Text style={styles.userIconText}>👤</Text>
         </View>
-        <Text style={styles.busNumber}>{item.busNumber}</Text>
+        <Text style={styles.busNumber}>{item.name}</Text>
       </View>
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.bookmarkButton}
         onPress={() => handleBookmarkPress(item.id)}
       >
-        <View style={[
-          styles.bookmarkIcon,
-          { backgroundColor: item.isBookmarked ? '#8B5CF6' : '#9CA3AF' }
-        ]}>
+        <View
+          style={[
+            styles.bookmarkIcon,
+            { backgroundColor: item.isBookmarked ? '#8B5CF6' : '#9CA3AF' },
+          ]}
+        >
           <Text style={styles.bookmarkText}>🏷️</Text>
         </View>
       </TouchableOpacity>
@@ -136,7 +212,7 @@ const SearchBusScreen = ({ navigation }) => {
   );
 
   const MenuItem = ({ title, onPress }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.menuItem}
       onPress={() => onPress(title)}
       activeOpacity={0.7}
@@ -149,24 +225,18 @@ const SearchBusScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       {/* Proper Status Bar */}
       <StatusBar barStyle="light-content" backgroundColor="#14B8A6" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         {/* Navigation Header */}
         <View style={styles.navigationHeader}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={handleBackPress}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
-          
+
           <Text style={styles.headerTitle}>Search Bus</Text>
-          
-          <TouchableOpacity 
-            style={styles.menuButton}
-            onPress={handleMenuPress}
-          >
+
+          <TouchableOpacity style={styles.menuButton} onPress={handleMenuPress}>
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
@@ -199,15 +269,15 @@ const SearchBusScreen = ({ navigation }) => {
       </View>
 
       {/* Bus List */}
-      <ScrollView 
+      <ScrollView
         style={styles.busList}
         showsVerticalScrollIndicator={false}
         bounces={true}
       >
-        {buses.map((item) => (
+        {buses.map(item => (
           <BusItem key={item.id} item={item} />
         ))}
-        
+
         {/* Add some bottom padding */}
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -217,21 +287,13 @@ const SearchBusScreen = ({ navigation }) => {
         <>
           {/* Dark Overlay */}
           <TouchableWithoutFeedback onPress={closeMenu}>
-            <Animated.View 
-              style={[
-                styles.overlay,
-                { opacity: overlayOpacity }
-              ]} 
+            <Animated.View
+              style={[styles.overlay, { opacity: overlayOpacity }]}
             />
           </TouchableWithoutFeedback>
 
           {/* Sliding Menu */}
-          <Animated.View 
-            style={[
-              styles.slideMenu,
-              { left: slideAnim }
-            ]}
-          >
+          <Animated.View style={[styles.slideMenu, { left: slideAnim }]}>
             <View style={styles.menuHeader}>
               <View style={styles.menuProfileSection}>
                 <View style={styles.menuProfilePicture}>

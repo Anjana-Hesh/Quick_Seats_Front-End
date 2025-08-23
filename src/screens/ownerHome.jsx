@@ -12,6 +12,39 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = 280;
@@ -32,23 +65,23 @@ const DriversScreen = ({ navigation }) => {
   ];
 
   const topActions = [
-    { 
-      id: 'add-driver', 
-      icon: '➕', 
+    {
+      id: 'add-driver',
+      icon: '➕',
       tooltip: 'Add New Driver',
-      action: () => navigation.navigate('AddDriverPage')
+      action: () => navigation.navigate('AddDriverPage'),
     },
-    { 
-      id: 'search', 
-      icon: '🔍', 
+    {
+      id: 'search',
+      icon: '🔍',
       tooltip: 'Search Drivers',
-      action: () => Alert.alert('Search', 'Open search functionality')
+      action: () => handleDriverPress(),
     },
-    { 
-      id: 'bookings', 
-      icon: ' 🔖', 
+    {
+      id: 'bookings',
+      icon: ' 🔖',
       tooltip: 'bookings',
-      action: () => navigation.navigate('DriverBooking') 
+      action: () => navigation.navigate('DriverBooking'),
     },
   ];
 
@@ -94,7 +127,7 @@ const DriversScreen = ({ navigation }) => {
     }
   };
 
-  const handleMenuItemPress = (item) => {
+  const handleMenuItemPress = item => {
     closeDrawer();
     switch (item.title) {
       case 'Messages':
@@ -104,24 +137,25 @@ const DriversScreen = ({ navigation }) => {
         navigation.navigate('OwnerSettings');
         break;
       case 'Dashboard':
-        case 'Profile':
-        case 'Logout':
-          Alert.alert(`${item.title}`, `Navigate to ${item.title}`);
+      case 'Profile':
+      case 'Logout':
+        Alert.alert(`${item.title}`, `Navigate to ${item.title}`);
+        navigation.navigate('Login');
         break;
       default:
         break;
     }
   };
 
-  const handleDriverPress = (driver) => {
+  const handleDriverPress = driver => {
     navigation.navigate('DriverBookingDataPrice', { driver: driver });
   };
 
-  const handleDriverMessage = (driver) => {
+  const handleDriverMessage = driver => {
     navigation.navigate('MessageInbox', { recipient: driver.name });
   };
 
-  const showTooltip = (actionId) => {
+  const showTooltip = actionId => {
     setTooltipVisible(actionId);
     setTimeout(() => setTooltipVisible(null), 2000);
   };
@@ -129,7 +163,7 @@ const DriversScreen = ({ navigation }) => {
   const renderTooltip = (action, index) => {
     if (tooltipVisible === action.id) {
       return (
-        <View style={[styles.tooltip, { left: 50 + (index * 100) }]}>
+        <View style={[styles.tooltip, { left: 50 + index * 100 }]}>
           <Text style={styles.tooltipText}>{action.tooltip}</Text>
           <View style={styles.tooltipArrow} />
         </View>
@@ -139,9 +173,9 @@ const DriversScreen = ({ navigation }) => {
   };
 
   const renderDriver = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.driverCard}
-      onPress={() => handleDriverPress(item)}
+      onPress={() => handleDriverMessage(item)}
     >
       <View style={styles.driverInfo}>
         <View style={styles.driverAvatar}>
@@ -149,7 +183,7 @@ const DriversScreen = ({ navigation }) => {
         </View>
         <Text style={styles.driverName}>{item.name}</Text>
       </View>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.messageButton}
         onPress={() => handleDriverMessage(item)}
       >
@@ -159,7 +193,7 @@ const DriversScreen = ({ navigation }) => {
   );
 
   const renderMenuItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.drawerItem}
       onPress={() => handleMenuItemPress(item)}
     >
@@ -171,7 +205,7 @@ const DriversScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A9EAF" />
-      
+
       {/* Overlay */}
       {isDrawerOpen && (
         <TouchableWithoutFeedback onPress={closeDrawer}>
@@ -185,7 +219,7 @@ const DriversScreen = ({ navigation }) => {
           <FlatList
             data={menuItems}
             renderItem={renderMenuItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
           />
         </View>
       </Animated.View>
@@ -200,7 +234,7 @@ const DriversScreen = ({ navigation }) => {
             <Text style={styles.greeting}>Hi Anjana ,</Text>
           </View>
         </View>
-        
+
         <TouchableOpacity onPress={toggleDrawer} style={styles.menuButton}>
           <Text style={styles.menuIcon}>☰</Text>
         </TouchableOpacity>
@@ -211,7 +245,7 @@ const DriversScreen = ({ navigation }) => {
         {topActions.map((action, index) => (
           <View key={action.id} style={styles.actionWrapper}>
             {renderTooltip(action, index)}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionCircle}
               onPress={action.action}
               onLongPress={() => showTooltip(action.id)}
@@ -225,11 +259,11 @@ const DriversScreen = ({ navigation }) => {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Drivers</Text>
-        
+
         <FlatList
           data={drivers}
           renderItem={renderDriver}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.driversList}
         />

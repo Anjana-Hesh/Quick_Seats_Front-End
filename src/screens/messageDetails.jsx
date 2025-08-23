@@ -1,7 +1,49 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  Alert,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 export default function MobileMessageInterface({ navigation }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,10 +52,11 @@ export default function MobileMessageInterface({ navigation }) {
     {
       id: 'ACD-01-DB',
       name: 'Kamal Perera',
-      message: 'Hello there, I need more information about the project details...',
+      message:
+        'Hello there, I need more information about the project details...',
       time: '2:30 PM',
       unread: true,
-      phone: '070 435 3463'
+      phone: '070 435 3463',
     },
     {
       id: 'ACD-02-DB',
@@ -21,7 +64,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Can we schedule a meeting for tomorrow?',
       time: '1:45 PM',
       unread: false,
-      phone: '071 567 8901'
+      phone: '071 567 8901',
     },
     {
       id: 'ACD-03-DB',
@@ -29,7 +72,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Thanks for the update. Everything looks good.',
       time: '12:20 PM',
       unread: true,
-      phone: '077 234 5678'
+      phone: '077 234 5678',
     },
     {
       id: 'ACD-04-DB',
@@ -37,7 +80,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Please send me the document when you get a chance.',
       time: '11:15 AM',
       unread: false,
-      phone: '075 345 6789'
+      phone: '075 345 6789',
     },
     {
       id: 'ACD-05-DB',
@@ -45,7 +88,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Great work on the presentation today!',
       time: '10:30 AM',
       unread: true,
-      phone: '078 456 7890'
+      phone: '078 456 7890',
     },
     {
       id: 'ACD-06-DB',
@@ -53,7 +96,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Could you clarify the requirements?',
       time: '9:45 AM',
       unread: false,
-      phone: '072 567 8901'
+      phone: '072 567 8901',
     },
     {
       id: 'ACD-07-DB',
@@ -61,7 +104,7 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'The system is working perfectly now.',
       time: 'Yesterday',
       unread: false,
-      phone: '076 678 9012'
+      phone: '076 678 9012',
     },
     {
       id: 'ACD-08-DB',
@@ -69,20 +112,21 @@ export default function MobileMessageInterface({ navigation }) {
       message: 'Let me know if you need any assistance.',
       time: 'Yesterday',
       unread: true,
-      phone: '074 789 0123'
-    }
+      phone: '074 789 0123',
+    },
   ];
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredContacts = contacts.filter(
+    contact =>
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleContactClick = (contact) => {
+  const handleContactClick = contact => {
     navigation.navigate('MessageInbox', {
       contactId: contact.id,
       contactName: contact.name,
-      contactPhone: contact.phone
+      contactPhone: contact.phone,
     });
   };
 
@@ -97,7 +141,10 @@ export default function MobileMessageInterface({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={handleBackClick} style={styles.headerButton}>
+          <TouchableOpacity
+            onPress={handleBackClick}
+            style={styles.headerButton}
+          >
             <Text style={styles.headerButtonText}>←</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Send Message</Text>
@@ -120,12 +167,12 @@ export default function MobileMessageInterface({ navigation }) {
       </View>
 
       {/* Contact List */}
-      <ScrollView 
-        style={styles.contactList} 
+      <ScrollView
+        style={styles.contactList}
         contentContainerStyle={styles.contactListContent}
         showsVerticalScrollIndicator={false}
       >
-        {filteredContacts.map((contact) => (
+        {filteredContacts.map(contact => (
           <TouchableOpacity
             key={contact.id}
             onPress={() => handleContactClick(contact)}
@@ -139,7 +186,7 @@ export default function MobileMessageInterface({ navigation }) {
                 </View>
                 {contact.unread && <View style={styles.unreadBadge} />}
               </View>
-              
+
               <View style={styles.contactDetails}>
                 <View style={styles.contactHeader}>
                   <Text style={styles.contactId}>{contact.id}</Text>
@@ -151,7 +198,7 @@ export default function MobileMessageInterface({ navigation }) {
                 </Text>
               </View>
             </View>
-            
+
             <TouchableOpacity style={styles.deleteIcon}>
               <Text style={styles.deleteIconText}>🗑️</Text>
             </TouchableOpacity>

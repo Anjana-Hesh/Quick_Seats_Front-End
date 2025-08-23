@@ -7,17 +7,56 @@ import {
   StatusBar,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading rout:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 // Manual Icons Components
-const BackIcon = ({ size = 24, color = "white" }) => (
+const BackIcon = ({ size = 24, color = 'white' }) => (
   <View style={[styles.icon, { width: size, height: size }]}>
-    <View style={[styles.backArrow, { borderTopColor: color, borderRightColor: color }]} />
+    <View
+      style={[
+        styles.backArrow,
+        { borderTopColor: color, borderRightColor: color },
+      ]}
+    />
   </View>
 );
 
-const MenuIcon = ({ size = 24, color = "white" }) => (
+const MenuIcon = ({ size = 24, color = 'white' }) => (
   <View style={[styles.icon, { width: size, height: size }]}>
     <View style={[styles.menuLine, { backgroundColor: color }]} />
     <View style={[styles.menuLine, { backgroundColor: color }]} />
@@ -28,11 +67,11 @@ const MenuIcon = ({ size = 24, color = "white" }) => (
 const DriverBookingDataScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  
+
   // Get booking data from navigation params or use default
-  const bookingData = route.params?.bookingData || { 
-    name: 'James Carter', 
-    date: 'Sun-02-02' 
+  const bookingData = route.params?.bookingData || {
+    name: 'James Carter',
+    date: 'Sun-02-02',
   };
 
   const [selectedBooking, setSelectedBooking] = useState(1); // Index 1 is selected by default
@@ -56,7 +95,7 @@ const DriverBookingDataScreen = () => {
     console.log('Menu pressed');
   };
 
-  const handleBookingSlotPress = (slotId) => {
+  const handleBookingSlotPress = slotId => {
     setSelectedBooking(slotId);
   };
 
@@ -68,18 +107,17 @@ const DriverBookingDataScreen = () => {
   };
 
   const BookingSlot = ({ slot, isSelected, onPress }) => (
-    <TouchableOpacity 
-      style={[
-        styles.bookingSlot, 
-        isSelected && styles.selectedBookingSlot
-      ]}
+    <TouchableOpacity
+      style={[styles.bookingSlot, isSelected && styles.selectedBookingSlot]}
       onPress={() => onPress(slot.id)}
       activeOpacity={0.7}
     >
-      <Text style={[
-        styles.bookingSlotText,
-        isSelected && styles.selectedBookingSlotText
-      ]}>
+      <Text
+        style={[
+          styles.bookingSlotText,
+          isSelected && styles.selectedBookingSlotText,
+        ]}
+      >
         {slot.date}
       </Text>
     </TouchableOpacity>
@@ -88,21 +126,21 @@ const DriverBookingDataScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#4A9BB8" barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.headerButton} 
+        <TouchableOpacity
+          style={styles.headerButton}
           onPress={handleBackPress}
           activeOpacity={0.7}
         >
           <BackIcon size={24} color="white" />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>{bookingData.name}</Text>
-        
-        <TouchableOpacity 
-          style={styles.headerButton} 
+
+        <TouchableOpacity
+          style={styles.headerButton}
           onPress={handleMenuPress}
           activeOpacity={0.7}
         >
@@ -129,9 +167,9 @@ const DriverBookingDataScreen = () => {
         {/* Bookings Section */}
         <View style={styles.bookingsSection}>
           <Text style={styles.bookingsTitle}>Bookings</Text>
-          
+
           <View style={styles.bookingSlots}>
-            {bookingSlots.map((slot) => (
+            {bookingSlots.map(slot => (
               <BookingSlot
                 key={slot.id}
                 slot={slot}
@@ -145,7 +183,7 @@ const DriverBookingDataScreen = () => {
 
       {/* Complete Button */}
       <View style={styles.bottomSection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.completeButton}
           onPress={handleCompletePress}
           activeOpacity={0.8}
@@ -301,7 +339,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   // Back Arrow Icon
   backArrow: {
     width: 0,
@@ -313,7 +351,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '225deg' }],
     marginLeft: 2,
   },
-  
+
   // Menu Icon (Hamburger)
   menuLine: {
     width: 18,

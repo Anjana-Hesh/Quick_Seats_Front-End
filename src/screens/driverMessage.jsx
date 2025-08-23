@@ -8,18 +8,57 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SideMenu from './components/SideMenu';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 // Manual Icons Components
-const BackIcon = ({ size = 24, color = "white" }) => (
+const BackIcon = ({ size = 24, color = 'white' }) => (
   <View style={[styles.icon, { width: size, height: size }]}>
-    <View style={[styles.backArrow, { borderTopColor: color, borderRightColor: color }]} />
+    <View
+      style={[
+        styles.backArrow,
+        { borderTopColor: color, borderRightColor: color },
+      ]}
+    />
   </View>
 );
 
-const MenuIcon = ({ size = 24, color = "white" }) => (
+const MenuIcon = ({ size = 24, color = 'white' }) => (
   <View style={[styles.icon, { width: size, height: size }]}>
     <View style={[styles.menuLine, { backgroundColor: color }]} />
     <View style={[styles.menuLine, { backgroundColor: color }]} />
@@ -27,21 +66,21 @@ const MenuIcon = ({ size = 24, color = "white" }) => (
   </View>
 );
 
-const SearchIcon = ({ size = 20, color = "#999" }) => (
+const SearchIcon = ({ size = 20, color = '#999' }) => (
   <View style={[styles.searchIconContainer, { width: size, height: size }]}>
     <View style={[styles.searchCircle, { borderColor: color }]} />
     <View style={[styles.searchHandle, { backgroundColor: color }]} />
   </View>
 );
 
-const PersonIcon = ({ size = 24, color = "#6B4E99" }) => (
+const PersonIcon = ({ size = 24, color = '#6B4E99' }) => (
   <View style={[styles.personIconContainer, { width: size, height: size }]}>
     <View style={[styles.personHead, { borderColor: color }]} />
     <View style={[styles.personBody, { borderColor: color }]} />
   </View>
 );
 
-const DeleteIcon = ({ size = 20, color = "#6B4E99" }) => (
+const DeleteIcon = ({ size = 20, color = '#6B4E99' }) => (
   <View style={[styles.deleteIconContainer, { width: size, height: size }]}>
     <View style={[styles.deleteCan, { borderColor: color }]} />
     <View style={[styles.deleteTop, { backgroundColor: color }]} />
@@ -56,45 +95,45 @@ const SendMessageScreen = () => {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
 
   const contacts = [
-    { 
-      id: 1, 
-      name: 'James Carter', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 1,
+      name: 'James Carter',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 2, 
-      name: 'Emily Johnson', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 2,
+      name: 'Emily Johnson',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 3, 
-      name: 'Michael Bennett', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 3,
+      name: 'Michael Bennett',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 4, 
-      name: 'Olivia Thompson', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 4,
+      name: 'Olivia Thompson',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 5, 
-      name: 'Daniel Cooper', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 5,
+      name: 'Daniel Cooper',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 6, 
-      name: 'Sophia Reynolds', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 6,
+      name: 'Sophia Reynolds',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 7, 
-      name: 'Benjamin Harris', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 7,
+      name: 'Benjamin Harris',
+      message: 'Hello there, I need more information about the...',
     },
-    { 
-      id: 8, 
-      name: 'Benjamin Harris', 
-      message: 'Hello there, I need more information about the...' 
+    {
+      id: 8,
+      name: 'Benjamin Harris',
+      message: 'Hello there, I need more information about the...',
     },
   ];
 
@@ -110,22 +149,22 @@ const SendMessageScreen = () => {
     setIsSideMenuVisible(false);
   };
 
-  const handleContactPress = (contact) => {
+  const handleContactPress = contact => {
     // Navigate to chat screen or message details
     navigation.navigate('MessageInbox', { contact });
   };
 
-  const handleDeleteContact = (contactId) => {
+  const handleDeleteContact = contactId => {
     // Add delete functionality here
     console.log('Delete contact:', contactId);
   };
 
   const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchText.toLowerCase())
+    contact.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const ContactItem = ({ contact }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.contactItem}
       onPress={() => handleContactPress(contact)}
       activeOpacity={0.7}
@@ -134,7 +173,7 @@ const SendMessageScreen = () => {
         <View style={styles.contactIcon}>
           <PersonIcon size={24} color="#6B4E99" />
         </View>
-        
+
         <View style={styles.contactDetails}>
           <Text style={styles.contactName}>{contact.name}</Text>
           <Text style={styles.contactMessage} numberOfLines={2}>
@@ -142,8 +181,8 @@ const SendMessageScreen = () => {
           </Text>
         </View>
       </View>
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => handleDeleteContact(contact.id)}
         activeOpacity={0.7}
@@ -156,21 +195,21 @@ const SendMessageScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#4A9BB8" barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.headerButton} 
+        <TouchableOpacity
+          style={styles.headerButton}
           onPress={handleBackPress}
           activeOpacity={0.7}
         >
           <BackIcon size={24} color="white" />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>Send Message</Text>
-        
-        <TouchableOpacity 
-          style={styles.headerButton} 
+
+        <TouchableOpacity
+          style={styles.headerButton}
           onPress={handleMenuPress}
           activeOpacity={0.7}
         >
@@ -193,18 +232,18 @@ const SendMessageScreen = () => {
       </View>
 
       {/* Contacts List */}
-      <ScrollView 
-        style={styles.contactsList} 
+      <ScrollView
+        style={styles.contactsList}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contactsContent}
       >
-        {filteredContacts.map((contact) => (
+        {filteredContacts.map(contact => (
           <ContactItem
             key={`${contact.id}-${contact.name}`}
             contact={contact}
           />
         ))}
-        
+
         {filteredContacts.length === 0 && searchText.length > 0 && (
           <View style={styles.noResults}>
             <Text style={styles.noResultsText}>No contacts found</Text>
@@ -213,10 +252,7 @@ const SendMessageScreen = () => {
       </ScrollView>
 
       {/* Side Menu */}
-      <SideMenu 
-        isVisible={isSideMenuVisible}
-        onClose={handleCloseSideMenu}
-      />
+      <SideMenu isVisible={isSideMenuVisible} onClose={handleCloseSideMenu} />
     </SafeAreaView>
   );
 };
@@ -341,7 +377,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   // Back Arrow Icon
   backArrow: {
     width: 0,
@@ -353,7 +389,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '225deg' }],
     marginLeft: 2,
   },
-  
+
   // Menu Icon (Hamburger)
   menuLine: {
     width: 18,
@@ -361,7 +397,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     borderRadius: 1,
   },
-  
+
   // Search Icon
   searchIconContainer: {
     justifyContent: 'center',

@@ -8,9 +8,42 @@ import {
   SafeAreaView,
   ScrollView,
   TextInput,
-  Alert
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const SettingsScreen = ({ navigation }) => {
   const [driverRoles, setDriverRoles] = useState([
@@ -29,7 +62,7 @@ const SettingsScreen = ({ navigation }) => {
     setDriverRoles([...driverRoles, 'Driver123@gmail.com']);
   };
 
-  const removeDriverRole = (index) => {
+  const removeDriverRole = index => {
     const newRoles = driverRoles.filter((_, i) => i !== index);
     setDriverRoles(newRoles);
   };
@@ -42,10 +75,10 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A9EAF" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -54,19 +87,19 @@ const SettingsScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Settings</Text>
       </View>
 
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Driver Roles Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Driver Roles</Text>
-          
+
           {driverRoles.map((email, index) => (
             <View key={index} style={styles.driverRoleItem}>
               <Text style={styles.driverEmail}>{email}</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => removeDriverRole(index)}
               >
@@ -74,9 +107,9 @@ const SettingsScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           ))}
-          
-          <TouchableOpacity 
-            style={styles.addButton} 
+
+          <TouchableOpacity
+            style={styles.addButton}
             onPress={addDriverRole}
             activeOpacity={0.7}
           >
@@ -88,7 +121,7 @@ const SettingsScreen = ({ navigation }) => {
         {/* Change User Details Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Change User Details</Text>
-          
+
           {/* User Name */}
           <View style={styles.detailItem}>
             <View style={styles.detailLeft}>
@@ -98,7 +131,9 @@ const SettingsScreen = ({ navigation }) => {
               <TextInput
                 style={styles.detailText}
                 value={userDetails.name}
-                onChangeText={(text) => setUserDetails({...userDetails, name: text})}
+                onChangeText={text =>
+                  setUserDetails({ ...userDetails, name: text })
+                }
                 placeholder="Full Name"
               />
             </View>
@@ -114,7 +149,9 @@ const SettingsScreen = ({ navigation }) => {
               <TextInput
                 style={styles.detailText}
                 value={userDetails.email}
-                onChangeText={(text) => setUserDetails({...userDetails, email: text})}
+                onChangeText={text =>
+                  setUserDetails({ ...userDetails, email: text })
+                }
                 keyboardType="email-address"
                 placeholder="Email Address"
               />
@@ -131,7 +168,9 @@ const SettingsScreen = ({ navigation }) => {
               <TextInput
                 style={styles.detailText}
                 value={userDetails.phone}
-                onChangeText={(text) => setUserDetails({...userDetails, phone: text})}
+                onChangeText={text =>
+                  setUserDetails({ ...userDetails, phone: text })
+                }
                 keyboardType="phone-pad"
                 placeholder="Phone Number"
               />
@@ -141,8 +180,8 @@ const SettingsScreen = ({ navigation }) => {
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity 
-          style={styles.saveButton} 
+        <TouchableOpacity
+          style={styles.saveButton}
           onPress={handleSave}
           activeOpacity={0.8}
         >

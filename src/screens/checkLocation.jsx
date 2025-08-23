@@ -1,33 +1,107 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
+import {
+  View,
+  Text,
   TextInput,
-  TouchableOpacity, 
-  StyleSheet, 
-  Dimensions, 
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
   ScrollView,
   StatusBar,
   SafeAreaView,
   Animated,
   TouchableWithoutFeedback,
-  Platform
+  Platform,
+  Alert,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 const MENU_WIDTH = width * 0.7;
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const CheckLocationScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [buses] = useState([
-    { id: 1, number: 'ACD-01-DB', route: 'Colombo - Kandy', currentLocation: { latitude: 7.2906, longitude: 80.6337 } },
-    { id: 2, number: 'ACD-02-DB', route: 'Colombo - Galle', currentLocation: { latitude: 6.9271, longitude: 79.8612 } },
-    { id: 3, number: 'ACD-03-DB', route: 'Kandy - Nuwara Eliya', currentLocation: { latitude: 7.2906, longitude: 80.6337 } },
-    { id: 4, number: 'ACD-04-DB', route: 'Colombo - Matara', currentLocation: { latitude: 6.9497, longitude: 79.8544 } },
-    { id: 5, number: 'ACD-05-DB', route: 'Kurunegala - Colombo', currentLocation: { latitude: 7.4863, longitude: 80.3647 } },
-    { id: 6, number: 'ACD-06-DB', route: 'Negombo - Colombo', currentLocation: { latitude: 7.2083, longitude: 79.8358 } },
-    { id: 7, number: 'ACD-07-DB', route: 'Anuradhapura - Colombo', currentLocation: { latitude: 8.3114, longitude: 80.4037 } },
-    { id: 8, number: 'ACD-08-DB', route: 'Ratnapura - Colombo', currentLocation: { latitude: 6.6828, longitude: 80.4126 } },
+    {
+      id: 1,
+      number: 'ACD-01-DB',
+      route: 'Colombo - Kandy',
+      currentLocation: { latitude: 7.2906, longitude: 80.6337 },
+    },
+    {
+      id: 2,
+      number: 'ACD-02-DB',
+      route: 'Colombo - Galle',
+      currentLocation: { latitude: 6.9271, longitude: 79.8612 },
+    },
+    {
+      id: 3,
+      number: 'ACD-03-DB',
+      route: 'Kandy - Nuwara Eliya',
+      currentLocation: { latitude: 7.2906, longitude: 80.6337 },
+    },
+    {
+      id: 4,
+      number: 'ACD-04-DB',
+      route: 'Colombo - Matara',
+      currentLocation: { latitude: 6.9497, longitude: 79.8544 },
+    },
+    {
+      id: 5,
+      number: 'ACD-05-DB',
+      route: 'Kurunegala - Colombo',
+      currentLocation: { latitude: 7.4863, longitude: 80.3647 },
+    },
+    {
+      id: 6,
+      number: 'ACD-06-DB',
+      route: 'Negombo - Colombo',
+      currentLocation: { latitude: 7.2083, longitude: 79.8358 },
+    },
+    {
+      id: 7,
+      number: 'ACD-07-DB',
+      route: 'Anuradhapura - Colombo',
+      currentLocation: { latitude: 8.3114, longitude: 80.4037 },
+    },
+    {
+      id: 8,
+      number: 'ACD-08-DB',
+      route: 'Ratnapura - Colombo',
+      currentLocation: { latitude: 6.6828, longitude: 80.4126 },
+    },
   ]);
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -50,7 +124,7 @@ const CheckLocationScreen = ({ navigation }) => {
         toValue: 0.5,
         duration: 300,
         useNativeDriver: false,
-      })
+      }),
     ]).start();
   };
 
@@ -65,7 +139,7 @@ const CheckLocationScreen = ({ navigation }) => {
         toValue: 0,
         duration: 300,
         useNativeDriver: false,
-      })
+      }),
     ]).start(() => {
       setIsMenuVisible(false);
     });
@@ -75,35 +149,41 @@ const CheckLocationScreen = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleBusPress = (bus) => {
+  const handleBusPress = bus => {
     // Navigate to BusLocationScreen with bus data
-    navigation.navigate('BusLocationScreen', { 
+    navigation.navigate('BusLocationScreen', {
       busNumber: bus.number,
       route: bus.route,
       currentLocation: bus.currentLocation,
-      busId: bus.id
+      busId: bus.id,
     });
   };
 
   // Filter buses based on search text
-  const filteredBuses = buses.filter(bus => 
-    bus.number.toLowerCase().includes(searchText.toLowerCase()) ||
-    bus.route.toLowerCase().includes(searchText.toLowerCase())
+  const filteredBuses = buses.filter(
+    bus =>
+      bus.number.toLowerCase().includes(searchText.toLowerCase()) ||
+      bus.route.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const BatteryIcon = ({ level }) => {
     const batteryColor = level > 20 ? 'black' : 'red';
-    
+
     return (
       <View style={styles.batteryContainer}>
-        <View style={[styles.battery, { width: `${level}%`, backgroundColor: batteryColor }]} />
+        <View
+          style={[
+            styles.battery,
+            { width: `${level}%`, backgroundColor: batteryColor },
+          ]}
+        />
         <View style={styles.batteryTip} />
       </View>
     );
   };
 
   const BusItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.busItem}
       onPress={() => handleBusPress(item)}
       activeOpacity={0.7}
@@ -120,7 +200,7 @@ const CheckLocationScreen = ({ navigation }) => {
   );
 
   const MenuItem = ({ title, onPress }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.menuItem}
       onPress={() => onPress(title)}
       activeOpacity={0.7}
@@ -132,17 +212,17 @@ const CheckLocationScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       {/* Custom Status Bar */}
       <View style={styles.statusBar}>
         <Text style={styles.timeText}>{time}</Text>
-        
+
         {Platform.OS === 'ios' && (
           <View style={styles.notchArea}>
             <View style={styles.notch} />
           </View>
         )}
-        
+
         <View style={styles.statusIcons}>
           <View style={styles.signalBars}>
             <View style={[styles.bar, styles.bar1]} />
@@ -150,26 +230,20 @@ const CheckLocationScreen = ({ navigation }) => {
             <View style={[styles.bar, styles.bar3]} />
             <View style={[styles.bar, styles.bar4]} />
           </View>
-          <Text style={styles.iconText}>📶</Text>
+          <Text style={styles.iconText}></Text>
           <BatteryIcon level={batteryLevel} />
         </View>
       </View>
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleBackPress}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>Check Location</Text>
-        
-        <TouchableOpacity 
-          style={styles.menuButton}
-          onPress={openMenu}
-        >
+
+        <TouchableOpacity style={styles.menuButton} onPress={openMenu}>
           <View style={styles.menuLine} />
           <View style={styles.menuLine} />
           <View style={styles.menuLine} />
@@ -193,22 +267,20 @@ const CheckLocationScreen = ({ navigation }) => {
       {/* Results Count */}
       <View style={styles.resultsContainer}>
         <Text style={styles.resultsText}>
-          {filteredBuses.length} bus{filteredBuses.length !== 1 ? 'es' : ''} found
+          {filteredBuses.length} bus{filteredBuses.length !== 1 ? 'es' : ''}{' '}
+          found
         </Text>
       </View>
 
       {/* Bus List */}
-      <ScrollView 
-        style={styles.busList}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.busList} showsVerticalScrollIndicator={false}>
         {filteredBuses.length > 0 ? (
-          filteredBuses.map((bus) => (
-            <BusItem key={bus.id} item={bus} />
-          ))
+          filteredBuses.map(bus => <BusItem key={bus.id} item={bus} />)
         ) : (
           <View style={styles.noBusesContainer}>
-            <Text style={styles.noBusesText}>No buses found matching your search</Text>
+            <Text style={styles.noBusesText}>
+              No buses found matching your search
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -217,20 +289,12 @@ const CheckLocationScreen = ({ navigation }) => {
       {isMenuVisible && (
         <>
           <TouchableWithoutFeedback onPress={closeMenu}>
-            <Animated.View 
-              style={[
-                styles.overlay,
-                { opacity: overlayOpacity }
-              ]} 
+            <Animated.View
+              style={[styles.overlay, { opacity: overlayOpacity }]}
             />
           </TouchableWithoutFeedback>
 
-          <Animated.View 
-            style={[
-              styles.slideMenu,
-              { left: slideAnim }
-            ]}
-          >
+          <Animated.View style={[styles.slideMenu, { left: slideAnim }]}>
             <View style={styles.menuHeader}>
               <View style={styles.menuProfileSection}>
                 <View style={styles.menuProfilePicture}>
@@ -241,9 +305,18 @@ const CheckLocationScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.menuContent}>
-              <MenuItem title="Profile" onPress={() => navigation.navigate('Profile')} />
-              <MenuItem title="Settings" onPress={() => navigation.navigate('Settings')} />
-              <MenuItem title="Log out" onPress={() => navigation.navigate('Login')} />
+              <MenuItem
+                title="Profile"
+                onPress={() => navigation.navigate('Profile')}
+              />
+              <MenuItem
+                title="Settings"
+                onPress={() => navigation.navigate('Settings')}
+              />
+              <MenuItem
+                title="Log out"
+                onPress={() => navigation.navigate('Login')}
+              />
             </View>
           </Animated.View>
         </>

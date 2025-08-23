@@ -9,6 +9,39 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+async function getLocalDataTime() {
+  try {
+    const data = await AsyncStorage.getItem('selectedRoute');
+    if (data !== null) {
+      return JSON.parse(data);
+    }
+    return null;
+  } catch (error) {
+    console.log('Error reading route:', error);
+  }
+}
+
+// connection
+async function connection(url, method) {
+  const response = fetch(url, {
+    method: { method },
+    headers: {
+      'content-Type': 'application/json',
+      Authorization: '',
+    },
+    body: JSON.stringify(),
+  });
+
+  if (!(await response).ok) {
+    throw new Error('Error');
+  }
+
+  const data = (await response).json();
+  Alert.alert('Success');
+  return data;
+}
 
 const ChangeUserDetailsScreen = ({ navigation }) => {
   const [name, setName] = useState('Anjana Heshan');
@@ -28,7 +61,7 @@ const ChangeUserDetailsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A9EAF" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
@@ -40,7 +73,7 @@ const ChangeUserDetailsScreen = ({ navigation }) => {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Change User Details</Text>
-        
+
         {/* Profile Picture */}
         <View style={styles.avatarSection}>
           <View style={styles.avatarContainer}>
@@ -52,7 +85,7 @@ const ChangeUserDetailsScreen = ({ navigation }) => {
             <Text style={styles.changePhotoText}>Change Profile Photo</Text>
           </TouchableOpacity>
         </View>
-        
+
         {/* Name Field */}
         <View style={styles.fieldContainer}>
           <View style={styles.iconContainer}>
